@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fjellstadbladet - Lokale nyheter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: white; color: #1a1a1a; }
+        .newspaper-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; letter-spacing: -1px; }
+        .serif { font-family: 'Playfair Display', serif; }
+        .top-banner { background-color: #001a33; color: #d4af37; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <header class="border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center text-sm">
+            <button class="border border-gray-300 px-3 py-1 rounded hover:bg-gray-50">Tips oss</button>
+            <div id="auth-section">
+                <button onclick="loginWithDiscord()" id="login-btn" class="flex items-center gap-2 hover:underline">
+                    <span>Logg inn</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="text-center py-6 border-b border-gray-100">
+        <h1 class="newspaper-title italic">Fjellstadbladet</h1>
+    </div>
+
+    <div class="top-banner py-1 text-center font-semibold italic flex justify-center items-center gap-2">
+        <span>❧</span> Årets Mediehus <span>❧</span>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div id="admin-ui" class="hidden mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex justify-between items-center">
+            <div>
+                <p class="font-bold text-red-800">Administrator-modus aktiv</p>
+                <p class="text-sm text-red-600" id="admin-name"></p>
+            </div>
+            <button onclick="document.getElementById('post-modal').classList.remove('hidden')" class="bg-red-700 text-white px-4 py-2 rounded font-bold">Skriv ny sak</button>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-8">
+                <div class="group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000" class="w-full h-[500px] object-cover mb-4">
+                    <h2 class="serif text-5xl font-bold hover:underline leading-tight">Velkommen til nye Fjellstadbladet</h2>
+                </div>
+            </div>
+            <div class="lg:col-span-4" id="news-feed">
+                <h3 class="font-bold border-b-2 border-black mb-4">Siste nytt</h3>
+                </div>
+        </div>
+    </main>
+
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+        <div class="bg-white p-8 rounded-lg max-w-lg w-full">
+            <h2 class="text-xl font-bold mb-4">Lag ny sak</h2>
+            <input type="text" id="title-input" placeholder="Overskrift" class="w-full border p-2 mb-4 rounded">
+            <textarea id="content-input" placeholder="Innhold..." class="w-full border p-2 mb-4 h-32 rounded"></textarea>
+            <div class="flex gap-2">
+                <button onclick="publish()" class="bg-black text-white px-4 py-2 rounded">Publiser</button>
+                <button onclick="document.getElementById('post-modal').classList.add('hidden')" class="bg-gray-200 px-4 py-2 rounded">Avbryt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = '1461112663172976724';
+        const REDIRECT_URI = window.location.origin + window.location.pathname;
+        
+        // DIN DISCORD ID (Bytt ut dette tallet med din faktiske ID for å få admin-tilgang)
+        const ADMIN_DISCORD_ID = '1158061375604662352'; 
+
+        function loginWithDiscord() {
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            window.location.href = url;
+        }
+
+        window.onload = () => {
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const accessToken = fragment.get('access_token');
+
+            if (accessToken) {
+                fetch('https://discord.com/api/users/@me', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                })
+                .then(res => res.json())
+                .then(user => {
+                    document.getElementById('auth-section').innerHTML = `
+                        <span class="font-semibold">${user.username}</span>
+                        <button onclick="location.href='${REDIRECT_URI}'" class="ml-2 text-xs underline">Logg ut</button>
+                    `;
+
+                    // Sjekk om det er din bruker
+                    if (user.id === ADMIN_DISCORD_ID || ADMIN_DISCORD_ID === 'DIN_ID_HER') {
+                        document.getElementById('admin-ui').classList.remove('hidden');
+                        document.getElementById('admin-name').innerText = `Logget inn som: ${user.username}`;
+                    }
+                });
+            }
+        };
+
+        function publish() {
+            const title = document.getElementById('title-input').value;
+            if(!title) return;
+            
+            const item = document.createElement('div');
+            item.className = "mb-6 pb-4 border-b border-gray-100";
+            item.innerHTML = `<h4 class="serif text-xl font-bold hover:underline cursor-pointer">${title}</h4>`;
+            
+            document.getElementById('news-feed').prepend(item);
+            document.getElementById('post-modal').classList.add('hidden');
+            document.getElementById('title-input').value = "";
+        }
+    </script>
+</body>
+</html>
