@@ -7,31 +7,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: white; color: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #1a1a1a; }
         .serif { font-family: 'Playfair Display', serif; }
         .newspaper-title { font-family: 'Playfair Display', serif; font-size: 3.5rem; letter-spacing: -1px; }
         
-        /* Outline og Smooth Corners som forespurt */
+        /* Proff Outline og Corners */
         .article-card {
             border: 2px solid black;
             border-radius: 12px;
             overflow: hidden;
             background: white;
-            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
         }
         .article-card img {
             border-bottom: 2px solid black;
-            border-radius: 10px 10px 0 0; /* Smooth corners øverst */
+            border-radius: 10px 10px 0 0;
+            object-fit: cover;
+            width: 100%;
         }
-        
-        .dragging { opacity: 0.5; scale: 0.95; }
+        .dragging { opacity: 0.4; border-style: dashed; }
     </style>
 </head>
 <body>
 
-    <header class="border-b border-gray-200">
+    <header class="border-b border-gray-200 sticky top-0 bg-white z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <button onclick="sendTips()" class="text-sm font-bold border-2 border-black px-4 py-1 rounded-md hover:bg-black hover:text-white transition">Tips oss</button>
+            <button onclick="location.href=location.pathname" class="text-sm font-bold border-2 border-black px-4 py-1 rounded-md hover:bg-black hover:text-white transition uppercase tracking-tighter">Tips oss</button>
             <div id="auth-section">
                 <button onclick="loginWithDiscord()" class="flex items-center gap-2 font-bold hover:underline">
                     <span>Logg inn</span>
@@ -41,32 +44,43 @@
         </div>
     </header>
 
-    <div class="text-center py-6">
-        <h1 class="newspaper-title italic underline decoration-1 underline-offset-8">Fjellstadbladet</h1>
-        <div class="bg-[#001a33] text-[#d4af37] py-1 mt-6 text-[10px] font-bold tracking-[0.2em] uppercase">
+    <div id="main-header" class="text-center py-8">
+        <h1 class="newspaper-title italic underline decoration-1 underline-offset-8 cursor-pointer" onclick="location.reload()">Fjellstadbladet</h1>
+        <div class="bg-[#001a33] text-[#d4af37] py-2 mt-8 text-[10px] font-bold tracking-[0.3em] uppercase">
             ❧ Årets Mediehus ❧
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <div id="admin-ui" class="hidden mb-8 p-4 bg-yellow-50 border-2 border-black rounded-xl flex justify-between items-center">
-            <span class="font-black text-xs uppercase tracking-tighter">Redaktør: <span id="admin-name"></span></span>
-            <button onclick="document.getElementById('post-modal').classList.remove('hidden')" class="bg-black text-white px-4 py-2 text-xs font-bold rounded-lg">NY ARTIKKEL</button>
+    <main id="front-page" class="max-w-7xl mx-auto px-4 py-8">
+        <div id="admin-ui" class="hidden mb-8 p-4 bg-gray-50 border-2 border-black rounded-xl flex justify-between items-center">
+            <span class="font-black text-xs uppercase">Redaktør: <span id="admin-name" class="text-red-600"></span></span>
+            <button onclick="openModal()" class="bg-black text-white px-6 py-2 text-xs font-bold rounded-lg hover:bg-gray-800">NY ARTIKKEL</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="news-grid">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="news-grid">
             </div>
     </main>
 
-    <div id="post-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-        <div class="bg-white border-4 border-black p-6 rounded-2xl max-w-lg w-full">
-            <h2 class="serif text-2xl font-bold mb-4">Lag ny sak</h2>
-            <input type="text" id="t-in" placeholder="Tittel" class="w-full border-2 border-black p-2 mb-2 rounded-lg outline-none">
-            <textarea id="l-in" placeholder="Ingress" class="w-full border-2 border-black p-2 mb-2 rounded-lg outline-none"></textarea>
-            <input type="text" id="i-in" placeholder="Bilde URL" class="w-full border-2 border-black p-2 mb-4 rounded-lg outline-none">
-            <div class="flex gap-2">
-                <button onclick="publish()" class="flex-1 bg-black text-white font-bold py-2 rounded-lg">PUBLISER</button>
-                <button onclick="document.getElementById('post-modal').classList.add('hidden')" class="px-4 border-2 border-black font-bold rounded-lg">AVBRYT</button>
+    <article id="article-view" class="hidden max-w-4xl mx-auto px-4 py-12">
+        <button onclick="closeArticle()" class="mb-8 font-bold uppercase text-xs tracking-widest border-b-2 border-black">← Tilbake til forsiden</button>
+        <h1 id="view-title" class="serif text-5xl font-bold mb-6 leading-tight"></h1>
+        <p id="view-lead" class="text-2xl text-gray-700 mb-8 leading-relaxed font-semibold border-l-8 border-black pl-6"></p>
+        <img id="view-img" src="" class="w-full h-auto rounded-xl border-2 border-black mb-8">
+        <div id="view-content" class="text-lg leading-loose space-y-6 whitespace-pre-wrap serif text-gray-800"></div>
+    </article>
+
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4">
+        <div class="bg-white border-4 border-black p-8 rounded-2xl max-w-2xl w-full shadow-2xl">
+            <h2 class="serif text-3xl font-bold mb-6">Opprett ny nyhetssak</h2>
+            <div class="space-y-4">
+                <input type="text" id="t-in" placeholder="Overskrift..." class="w-full border-2 border-gray-200 p-3 rounded-lg text-xl font-bold focus:border-black outline-none">
+                <textarea id="l-in" placeholder="Ingress (kort sammendrag)..." class="w-full border-2 border-gray-200 p-3 rounded-lg h-24 focus:border-black outline-none"></textarea>
+                <input type="text" id="i-in" placeholder="Bilde-URL (fra Unsplash eller lignende)..." class="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-black outline-none">
+                <textarea id="c-in" placeholder="Selve artikkelteksten her..." class="w-full border-2 border-gray-200 p-3 rounded-lg h-48 focus:border-black outline-none"></textarea>
+                <div class="flex gap-4 pt-4">
+                    <button onclick="publish()" class="flex-1 bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-800 transition">PUBLISER SAK</button>
+                    <button onclick="closeModal()" class="px-8 border-2 border-black font-bold rounded-xl">AVBRYT</button>
+                </div>
             </div>
         </div>
     </div>
@@ -75,29 +89,13 @@
         const CLIENT_ID = '1461112663172976724';
         const REDIRECT_URI = window.location.origin + '/';
         const ADMIN_ID = '1158061375604662352';
-        const WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_URL_HER'; // LIM INN WEBHOOK HER
 
         let articles = JSON.parse(localStorage.getItem('fjellstad_nyheter')) || [];
+        let isAdmin = false;
 
         function loginWithDiscord() {
             const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
             window.location.href = url;
-        }
-
-        async function sendTips() {
-            const tips = prompt("Hva vil du tipse oss om?");
-            if (!tips) return;
-
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: `🚨 **NYTT TIPS:** ${tips}` })
-                });
-                alert("Takk for tipset!");
-            } catch (e) {
-                alert("Kunne ikke sende tips. Sjekk Webhook-URL.");
-            }
         }
 
         window.onload = () => {
@@ -113,48 +111,99 @@
                 .then(r => r.json())
                 .then(user => {
                     if (user.id === ADMIN_ID) {
+                        isAdmin = true;
                         document.getElementById('admin-ui').classList.remove('hidden');
                         document.getElementById('admin-name').innerText = user.username;
-                        renderFrontPage(); 
+                        renderFrontPage(); // Oppdaterer for å vise admin-funksjoner
                     }
                 });
             }
         };
 
         function publish() {
-            const art = {
-                title: document.getElementById('t-in').value,
-                lead: document.getElementById('l-in').value,
-                img: document.getElementById('i-in').value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800'
-            };
-            articles.unshift(art);
+            const title = document.getElementById('t-in').value;
+            const lead = document.getElementById('l-in').value;
+            const content = document.getElementById('c-in').value;
+            const img = document.getElementById('i-in').value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200';
+
+            if (!title || !content) return alert("Du må fylle ut tittel og brødtekst!");
+
+            const newArt = { id: Date.now(), title, lead, content, img };
+            articles.unshift(newArt);
             localStorage.setItem('fjellstad_nyheter', JSON.stringify(articles));
             location.reload();
         }
 
         function renderFrontPage() {
             const grid = document.getElementById('news-grid');
-            grid.innerHTML = articles.map((art, i) => `
-                <div class="article-card ${i === 0 ? 'md:col-span-2' : ''}" draggable="true" ondragstart="start(${i})" ondragover="over(event)" ondrop="drop(${i})">
-                    <img src="${art.img}" class="w-full ${i === 0 ? 'h-96' : 'h-48'} object-cover">
-                    <div class="p-4">
-                        <h2 class="serif ${i === 0 ? 'text-4xl' : 'text-xl'} font-bold leading-tight">${art.title}</h2>
-                        ${i === 0 ? `<p class="mt-2 text-gray-600">${art.lead}</p>` : ''}
+            grid.innerHTML = '';
+
+            articles.forEach((art, i) => {
+                const card = document.createElement('div');
+                card.className = `article-card ${i === 0 ? 'md:col-span-2' : ''}`;
+                
+                // Kun tillat dragging hvis man er admin
+                if (isAdmin) {
+                    card.draggable = true;
+                    card.ondragstart = (e) => { dragIdx = i; card.classList.add('dragging'); };
+                    card.ondragover = (e) => e.preventDefault();
+                    card.ondrop = () => handleDrop(i);
+                    card.ondragend = () => card.classList.remove('dragging');
+                }
+
+                card.innerHTML = `
+                    <div onclick="openArticle(${art.id})">
+                        <img src="${art.img}" class="${i === 0 ? 'h-[500px]' : 'h-52'}">
+                        <div class="p-6">
+                            <h2 class="serif ${i === 0 ? 'text-5xl' : 'text-2xl'} font-bold leading-tight group-hover:underline">${art.title}</h2>
+                            <p class="mt-4 text-gray-600 line-clamp-3">${art.lead || ''}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                    ${isAdmin ? `<button onclick="deleteArt(${art.id})" class="bg-red-600 text-white text-[10px] font-bold p-1 m-2 rounded self-end">SLETT</button>` : ''}
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        // Enkel Drag & Drop
         let dragIdx;
-        function start(i) { dragIdx = i; }
-        function over(e) { e.preventDefault(); }
-        function drop(i) {
+        function handleDrop(targetIdx) {
             const item = articles.splice(dragIdx, 1)[0];
-            articles.splice(i, 0, item);
+            articles.splice(targetIdx, 0, item);
             localStorage.setItem('fjellstad_nyheter', JSON.stringify(articles));
             renderFrontPage();
         }
+
+        function openArticle(id) {
+            const art = articles.find(a => a.id === id);
+            if (!art) return;
+
+            document.getElementById('front-page').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('article-view').classList.remove('hidden');
+
+            document.getElementById('view-title').innerText = art.title;
+            document.getElementById('view-lead').innerText = art.lead || '';
+            document.getElementById('view-img').src = art.img;
+            document.getElementById('view-content').innerText = art.content;
+            window.scrollTo(0,0);
+        }
+
+        function closeArticle() {
+            document.getElementById('front-page').classList.remove('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('article-view').classList.add('hidden');
+        }
+
+        function deleteArt(id) {
+            if (confirm("Slette saken?")) {
+                articles = articles.filter(a => a.id !== id);
+                localStorage.setItem('fjellstad_nyheter', JSON.stringify(articles));
+                renderFrontPage();
+            }
+        }
+
+        function openModal() { document.getElementById('post-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('post-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
