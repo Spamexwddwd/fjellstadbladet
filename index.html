@@ -17,7 +17,7 @@
 
     <header class="border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center text-sm">
-            <button class="border border-gray-300 px-3 py-1 rounded hover:bg-gray-50">Tips oss</button>
+            <button onclick="window.location.reload()" class="border border-gray-300 px-3 py-1 rounded hover:bg-gray-50">Hjem</button>
             <div id="auth-section">
                 <button onclick="loginWithDiscord()" id="login-btn" class="flex items-center gap-2 hover:underline">
                     <span>Logg inn</span>
@@ -27,44 +27,80 @@
         </div>
     </header>
 
-    <div class="text-center py-6 border-b border-gray-100">
-        <h1 class="newspaper-title italic">Fjellstadbladet</h1>
-    </div>
-
-    <div class="top-banner py-1 text-center font-semibold italic flex justify-center items-center gap-2">
-        <span>❧</span> Årets Mediehus <span>❧</span>
-    </div>
-
-    <main class="max-w-7xl mx-auto px-4 py-6">
-        <div id="admin-ui" class="hidden mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex justify-between items-center">
-            <div>
-                <p class="font-bold text-red-800">Administrator-modus aktiv</p>
-                <p class="text-sm text-red-600" id="admin-name"></p>
-            </div>
-            <button onclick="document.getElementById('post-modal').classList.remove('hidden')" class="bg-red-700 text-white px-4 py-2 rounded font-bold">Skriv ny sak</button>
+    <div id="main-view">
+        <div class="text-center py-6 border-b border-gray-100">
+            <h1 class="newspaper-title italic underline decoration-1 underline-offset-8">Fjellstadbladet</h1>
         </div>
 
-        <div class="grid lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-8">
-                <div class="group cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000" class="w-full h-[500px] object-cover mb-4">
-                    <h2 class="serif text-5xl font-bold hover:underline leading-tight">Velkommen til nye Fjellstadbladet</h2>
-                </div>
-            </div>
-            <div class="lg:col-span-4" id="news-feed">
-                <h3 class="font-bold border-b-2 border-black mb-4">Siste nytt</h3>
-                </div>
+        <div class="top-banner py-1 text-center font-semibold italic flex justify-center items-center gap-2">
+            <span>❧</span> Årets Mediehus <span>❧</span>
         </div>
-    </main>
 
-    <div id="post-modal" class="hidden fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-        <div class="bg-white p-8 rounded-lg max-w-lg w-full">
-            <h2 class="text-xl font-bold mb-4">Lag ny sak</h2>
-            <input type="text" id="title-input" placeholder="Overskrift" class="w-full border p-2 mb-4 rounded">
-            <textarea id="content-input" placeholder="Innhold..." class="w-full border p-2 mb-4 h-32 rounded"></textarea>
-            <div class="flex gap-2">
-                <button onclick="publish()" class="bg-black text-white px-4 py-2 rounded">Publiser</button>
-                <button onclick="document.getElementById('post-modal').classList.add('hidden')" class="bg-gray-200 px-4 py-2 rounded">Avbryt</button>
+        <main class="max-w-7xl mx-auto px-4 py-6">
+            <div id="admin-ui" class="hidden mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg flex justify-between items-center">
+                <div>
+                    <p class="font-bold">Redaktørverktøy</p>
+                    <p class="text-sm text-gray-600" id="admin-name"></p>
+                </div>
+                <button onclick="document.getElementById('post-modal').classList.remove('hidden')" class="bg-black text-white px-6 py-2 rounded font-bold hover:bg-gray-800 transition">OPPRETT SAK</button>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-8">
+                    <div id="hero-section" class="group cursor-pointer">
+                        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200" class="w-full h-[500px] object-cover mb-4">
+                        <h2 class="serif text-5xl font-bold hover:underline leading-tight">Velkommen til nye Fjellstadbladet</h2>
+                        <p class="mt-4 text-xl text-gray-600 leading-relaxed">Vi har lansert vår nye nettavis med fokus på lokale nyheter fra hele Fjellstad-regionen.</p>
+                    </div>
+                </div>
+                <div class="lg:col-span-4" id="news-feed">
+                    <h3 class="font-bold border-b-2 border-black mb-4 uppercase text-xs tracking-widest">Siste nytt</h3>
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="article-view" class="hidden max-w-3xl mx-auto px-4 py-12">
+        <h1 id="view-title" class="serif text-5xl font-bold mb-4 leading-tight"></h1>
+        <p id="view-lead" class="text-xl text-gray-700 mb-8 leading-relaxed font-semibold"></p>
+        
+        <div class="mb-8">
+            <img id="view-img" src="" class="w-full h-auto mb-2">
+            <p id="view-credit" class="text-sm text-gray-500 italic"></p>
+        </div>
+
+        <div id="view-content" class="text-lg leading-loose space-y-6 text-gray-800"></div>
+    </div>
+
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/80 flex justify-center items-center z-50 p-4">
+        <div class="bg-white p-8 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold serif">Ny artikkel</h2>
+                <button onclick="document.getElementById('post-modal').classList.add('hidden')" class="text-gray-400 hover:text-black text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1">Overskrift</label>
+                    <input type="text" id="title-input" class="w-full border p-3 rounded text-xl font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1">Ingress (Kort introduksjon)</label>
+                    <textarea id="lead-input" class="w-full border p-3 rounded h-20"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1">Bilde URL</label>
+                    <input type="text" id="img-input" placeholder="https://..." class="w-full border p-3 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1">Fotograf (Kreditt)</label>
+                    <input type="text" id="credit-input" placeholder="Foto: Navn Navnesen" class="w-full border p-3 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1">Brødtekst</label>
+                    <textarea id="content-input" class="w-full border p-3 rounded h-40"></textarea>
+                </div>
+                <button onclick="publish()" class="w-full bg-red-700 text-white py-4 rounded font-bold text-lg hover:bg-red-800">PUBLISER SAK</button>
             </div>
         </div>
     </div>
@@ -72,8 +108,6 @@
     <script>
         const CLIENT_ID = '1461112663172976724';
         const REDIRECT_URI = window.location.origin + window.location.pathname;
-        
-        // DIN DISCORD ID (Bytt ut dette tallet med din faktiske ID for å få admin-tilgang)
         const ADMIN_DISCORD_ID = '1158061375604662352'; 
 
         function loginWithDiscord() {
@@ -92,30 +126,54 @@
                 .then(res => res.json())
                 .then(user => {
                     document.getElementById('auth-section').innerHTML = `
-                        <span class="font-semibold">${user.username}</span>
-                        <button onclick="location.href='${REDIRECT_URI}'" class="ml-2 text-xs underline">Logg ut</button>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold underline">${user.username}</span>
+                        </div>
                     `;
-
-                    // Sjekk om det er din bruker
-                    if (user.id === ADMIN_DISCORD_ID || ADMIN_DISCORD_ID === 'DIN_ID_HER') {
+                    if (user.id === ADMIN_DISCORD_ID) {
                         document.getElementById('admin-ui').classList.remove('hidden');
-                        document.getElementById('admin-name').innerText = `Logget inn som: ${user.username}`;
+                        document.getElementById('admin-name').innerText = `Innlogget som redaktør: ${user.username}`;
                     }
                 });
             }
         };
 
         function publish() {
-            const title = document.getElementById('title-input').value;
-            if(!title) return;
-            
-            const item = document.createElement('div');
-            item.className = "mb-6 pb-4 border-b border-gray-100";
-            item.innerHTML = `<h4 class="serif text-xl font-bold hover:underline cursor-pointer">${title}</h4>`;
-            
-            document.getElementById('news-feed').prepend(item);
+            const data = {
+                title: document.getElementById('title-input').value,
+                lead: document.getElementById('lead-input').value,
+                img: document.getElementById('img-input').value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800',
+                credit: document.getElementById('credit-input').value,
+                content: document.getElementById('content-input').value
+            };
+
+            if(!data.title || !data.content) return alert("Du må ha tittel og tekst!");
+
+            // Oppdater forsiden (Hero-seksjonen)
+            document.getElementById('hero-section').innerHTML = `
+                <img src="${data.img}" class="w-full h-[500px] object-cover mb-4">
+                <h2 class="serif text-5xl font-bold hover:underline leading-tight">${data.title}</h2>
+                <p class="mt-4 text-xl text-gray-600 leading-relaxed">${data.lead}</p>
+            `;
+
+            // Gjør hero-seksjonen klikkbar for å se hele saken
+            document.getElementById('hero-section').onclick = () => openArticle(data);
+
             document.getElementById('post-modal').classList.add('hidden');
-            document.getElementById('title-input').value = "";
+            alert("Saken er publisert på forsiden!");
+        }
+
+        function openArticle(data) {
+            document.getElementById('main-view').classList.add('hidden');
+            document.getElementById('article-view').classList.remove('hidden');
+            
+            document.getElementById('view-title').innerText = data.title;
+            document.getElementById('view-lead').innerText = data.lead;
+            document.getElementById('view-img').src = data.img;
+            document.getElementById('view-credit').innerText = data.credit;
+            document.getElementById('view-content').innerText = data.content;
+            
+            window.scrollTo(0,0);
         }
     </script>
 </body>
