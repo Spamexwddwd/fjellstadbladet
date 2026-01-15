@@ -33,6 +33,10 @@
         .footer-section h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; margin-bottom: 20px; opacity: 0.9; }
         .footer-section ul { list-style: none; padding: 0; }
         .footer-section ul li { margin-bottom: 10px; font-size: 0.9rem; opacity: 0.7; }
+
+        /* Stil for Tags slik som i bildet */
+        .tag-pill { background-color: #f3f4f6; color: #1f2937; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; }
+        .bg-fjellstad-blue .tag-pill { background-color: rgba(255,255,255,0.1); color: white; }
     </style>
 </head>
 <body>
@@ -66,8 +70,18 @@
     <article id="article-view" class="hidden min-h-screen pb-20">
         <div class="max-w-3xl mx-auto px-4 pt-20">
             <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase opacity-40 hover:opacity-100">← Tilbake til forsiden</button>
+            
             <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8 leading-tight"></h1>
-            <p id="view-lead" class="text-2xl mb-16 italic border-l-4 border-current pl-8 opacity-80"></p>
+            <p id="view-lead" class="text-2xl mb-8 italic border-l-4 border-current pl-8 opacity-80"></p>
+
+            <div class="mb-12 border-t border-gray-100 pt-6">
+                <div id="view-meta" class="text-sm opacity-60 mb-6 space-y-1">
+                    <p id="pub-date"></p>
+                    <p id="upd-date"></p>
+                </div>
+                <div id="view-tags" class="flex flex-wrap gap-2"></div>
+            </div>
+
             <div id="article-content-area" class="space-y-12 text-xl leading-relaxed"></div>
         </div>
     </article>
@@ -160,18 +174,15 @@
         let editingId = null;
         let selectedBg = 'white';
 
-        // --- KRAFTIG URL RYDDER ---
+        // --- URL RYDDER ---
         function hardcoreClean() {
             if (window.location.hash.includes('access_token')) {
-                // Vi fjerner alt etter domenet og pusher en ren URL
                 const cleanUrl = window.location.origin + window.location.pathname;
                 window.history.replaceState(null, "", cleanUrl);
-                console.log("URL ble vasket!");
             }
         }
 
         window.onload = async () => {
-            // Sjekk hvert 100. millisekund i 3 sekunder om URL-en har stygg tekst
             const cleanerInterval = setInterval(hardcoreClean, 100);
             setTimeout(() => clearInterval(cleanerInterval), 3000);
 
@@ -274,8 +285,27 @@
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('header-visuals').classList.add('hidden');
             view.classList.remove('hidden');
+
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
+
+            // --- NYTT: Datoformatering ---
+            const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            const pubDate = new Date(art.created_at).toLocaleString('no-NO', options);
+            document.getElementById('pub-date').innerText = `Publisert: ${pubDate}`;
+            document.getElementById('upd-date').innerText = `Oppdatert: ${pubDate}`;
+
+            // --- NYTT: Tags ---
+            const tagsArea = document.getElementById('view-tags');
+            tagsArea.innerHTML = ''; 
+            const tags = ["Fjellstad", "Nyhet"]; 
+            tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = "tag-pill";
+                span.innerText = tag;
+                tagsArea.appendChild(span);
+            });
+
             document.getElementById('article-content-area').innerHTML = art.blocks.map(b => 
                 b.type === 'text' ? `<p class="mb-8">${b.value}</p>` : 
                 `<figure class="mb-12">
@@ -299,6 +329,8 @@
             await fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(msg) });
             alert("Takk for tipset!"); closeTips();
         }
+
+        function closeModal() { document.getElementById('post-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
