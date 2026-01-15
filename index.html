@@ -8,190 +8,130 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600;700;900&display=swap');
-        
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; }
         .serif { font-family: 'Playfair Display', serif; }
         .newspaper-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: -2px; }
-        
-        .article-card {
-            border: 2px solid black;
-            border-radius: 20px;
-            overflow: hidden;
-            background: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        
+        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; height: 100%; }
         .article-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .article-card img { width: 100%; object-fit: cover; border: none; }
-
-        .btn-tips {
-            background: black;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            transition: all 0.2s;
-        }
-
-        .admin-badge {
-            background: #fefce8;
-            border: 1px solid #fef08a;
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-        }
+        .bg-fjellstad-blue { background-color: #001f3f !important; color: white !important; }
+        .bg-fjellstad-blue p, .bg-fjellstad-blue h2 { color: white !important; }
     </style>
 </head>
 <body>
 
     <header class="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <button onclick="openTips()" class="btn-tips shadow-xl shadow-black/10">Tips oss</button>
+            <button onclick="openTips()" class="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-[10px] tracking-widest">Tips oss</button>
             <div id="auth-section">
-                <button onclick="loginWithDiscord()" class="text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:opacity-60 transition">
-                    Logg inn <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </button>
+                <button onclick="loginWithDiscord()" class="text-xs font-black uppercase tracking-widest">Logg inn</button>
             </div>
         </div>
     </header>
 
     <div id="header-visuals" class="text-center py-16">
         <h1 class="newspaper-title italic underline decoration-2 underline-offset-8 cursor-pointer" onclick="location.reload()">Fjellstadbladet</h1>
-        <div class="inline-block bg-black text-[#d4af37] px-8 py-2 mt-12 text-[10px] font-black tracking-[0.5em] uppercase rounded-full">
-            ❧ Årets Mediehus ❧
-        </div>
     </div>
 
     <main id="main-view" class="max-w-7xl mx-auto px-4 pb-20">
-        <div id="admin-ui" class="hidden mb-12 admin-badge flex justify-between items-center">
+        <div id="admin-ui" class="hidden mb-12 p-6 bg-yellow-50 border border-yellow-200 rounded-2xl flex justify-between items-center">
             <div>
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-40">Redaktørtilgang</p>
-                <p id="admin-name" class="font-bold text-gray-900"></p>
-                <button onclick="logout()" class="text-[10px] underline font-bold opacity-50 hover:opacity-100">Logg ut</button>
+                <p class="text-[10px] font-black uppercase opacity-40">Redaktør</p>
+                <p id="admin-name" class="font-bold"></p>
             </div>
-            <button onclick="openModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase hover:bg-red-700 transition">Lag ny artikkel</button>
+            <button onclick="openModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase">Lag ny artikkel</button>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10" id="news-grid">
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10" id="news-grid"></div>
     </main>
 
     <article id="article-view" class="hidden max-w-3xl mx-auto px-4 py-20 min-h-screen">
-        <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase tracking-widest opacity-40 hover:opacity-100 transition flex items-center gap-2">
-            Tilbake til forsiden
-        </button>
-        <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tighter"></h1>
-        <p id="view-lead" class="text-2xl text-gray-600 mb-16 leading-relaxed font-medium italic border-l-4 border-black pl-8"></p>
-        <div id="article-content-area" class="space-y-12"></div>
+        <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase opacity-40">Tilbake</button>
+        <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8"></h1>
+        <p id="view-lead" class="text-2xl mb-16 italic border-l-4 border-black pl-8"></p>
+        <div id="article-content-area" class="space-y-12 text-xl leading-relaxed"></div>
     </article>
 
-    <div id="tips-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-        <div class="bg-white border-2 border-black rounded-[40px] p-10 max-w-md w-full">
-            <h2 class="serif text-4xl font-bold mb-2">Tips oss</h2>
-            <div class="space-y-4">
-                <input type="text" id="tips-contact" placeholder="Navn / Kontaktinfo" class="w-full bg-gray-50 p-5 rounded-2xl outline-none">
-                <textarea id="tips-body" placeholder="Hva skjer i Fjellstad?" class="w-full bg-gray-50 p-5 rounded-2xl h-40 outline-none"></textarea>
-                <button onclick="submitTips()" class="w-full bg-black text-white font-black py-6 rounded-3xl uppercase tracking-widest text-sm shadow-xl">Send tips</button>
-                <button onclick="closeTips()" class="w-full text-xs font-bold opacity-30 mt-4">Lukk</button>
-            </div>
-        </div>
-    </div>
-
     <div id="post-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white border-2 border-black rounded-[48px] p-10 max-w-2xl w-full my-10 relative">
-            <h2 class="serif text-4xl font-bold mb-8">Opprett sak</h2>
-            <div class="space-y-6">
-                <input type="text" id="t-in" placeholder="Tittel" class="w-full border-b-2 border-gray-100 py-4 text-3xl font-bold outline-none focus:border-black transition">
-                <textarea id="l-in" placeholder="Ingress..." class="w-full border-b-2 border-gray-100 py-4 text-lg outline-none focus:border-black transition"></textarea>
-                
-                <div id="content-builder" class="space-y-4"></div>
+        <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10 relative">
+            <h2 id="modal-title" class="serif text-3xl font-bold mb-6">Opprett sak</h2>
+            
+            <div class="flex gap-4 mb-6">
+                <button onclick="setBg('white')" id="btn-white" class="px-4 py-2 border-2 border-black rounded-lg text-xs font-bold bg-gray-100">Hvit bakgrunn</button>
+                <button onclick="setBg('blue')" id="btn-blue" class="px-4 py-2 border-2 border-transparent rounded-lg text-xs font-bold bg-slate-800 text-white">Blå bakgrunn</button>
+            </div>
 
-                <div class="flex gap-4">
-                    <button onclick="addBlock('text')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">+ Tekst</button>
-                    <button onclick="addBlock('image')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">+ Bilde</button>
+            <div class="space-y-4">
+                <input type="text" id="t-in" placeholder="Tittel" class="w-full text-2xl font-bold border-b p-2 outline-none">
+                <textarea id="l-in" placeholder="Ingress..." class="w-full border-b p-2 outline-none h-20"></textarea>
+                <div id="content-builder" class="space-y-4 max-h-64 overflow-y-auto p-2"></div>
+                <div class="flex gap-2">
+                    <button onclick="addBlock('text')" class="bg-gray-100 px-4 py-2 rounded-lg font-bold text-xs">+ TEKST</button>
+                    <button onclick="addBlock('image')" class="bg-gray-100 px-4 py-2 rounded-lg font-bold text-xs">+ BILDE</button>
                 </div>
-
-                <div class="flex gap-4 pt-10">
-                    <button id="publish-btn" onclick="publish()" class="flex-[2] bg-red-600 text-white font-black py-6 rounded-[30px] uppercase tracking-widest shadow-xl">Publiser sak</button>
-                    <button onclick="closeModal()" class="flex-1 border-2 border-black font-black py-6 rounded-[30px] uppercase text-[10px] tracking-widest">Avbryt</button>
+                <div class="flex gap-4 pt-6">
+                    <button onclick="publish()" id="publish-btn" class="flex-1 bg-red-600 text-white font-black py-4 rounded-2xl uppercase">Lagre og publiser</button>
+                    <button onclick="closeModal()" class="px-6 py-4 border-2 border-black rounded-2xl font-bold">Avbryt</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURASJON ---
         const SUPABASE_URL = 'https://joyxkghutpwxrleafaxv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ADMIN_DISCORD_ID = '1158061375604662352'; 
-        const WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_URL'; 
-
         let articles = [];
         let isAdmin = false;
         let contentBlocks = [];
+        let editingId = null;
+        let selectedBg = 'white';
 
-        window.onload = async () => {
-            await fetchArticles();
-            checkUser();
-        };
+        window.onload = async () => { await fetchArticles(); checkUser(); };
 
-        // Logger inn via Supabase Auth
-        async function loginWithDiscord() {
-            const { data, error } = await _supabase.auth.signInWithOAuth({
-                provider: 'discord',
-                options: { redirectTo: window.location.origin }
-            });
-            if (error) console.error("Login feil:", error.message);
-        }
-
-        // Sjekker om brukeren er logget inn og er admin
+        async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin } }); }
+        
         async function checkUser() {
             const { data: { user } } = await _supabase.auth.getUser();
-            
-            if (user) {
-                // Sjekker Discord-ID i metadataene
-                if (user.user_metadata.provider_id === ADMIN_DISCORD_ID) {
-                    isAdmin = true;
-                    document.getElementById('admin-ui').classList.remove('hidden');
-                    document.getElementById('admin-name').innerText = (user.user_metadata.full_name || user.email).toUpperCase();
-                    document.getElementById('auth-section').innerHTML = `<span class="text-xs font-black uppercase">Redaktør: ${user.user_metadata.full_name || 'Admin'}</span>`;
-                    renderFrontPage(); 
-                }
+            if (user && user.user_metadata.provider_id === ADMIN_DISCORD_ID) {
+                isAdmin = true;
+                document.getElementById('admin-ui').classList.remove('hidden');
+                document.getElementById('admin-name').innerText = user.user_metadata.full_name.toUpperCase();
+                document.getElementById('auth-section').innerHTML = `<span class="text-xs font-black">Hei, ${user.user_metadata.full_name}</span>`;
+                renderFrontPage();
             }
         }
 
-        async function logout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
-
         async function fetchArticles() {
-            const { data, error } = await _supabase.from('articles').select('*').order('created_at', { ascending: false });
+            const { data } = await _supabase.from('articles').select('*').order('created_at', { ascending: false });
             if (data) { articles = data; renderFrontPage(); }
         }
 
-        function addBlock(type) {
-            contentBlocks.push({ type, value: '', extra: '' });
-            renderBuilder();
+        function setBg(color) {
+            selectedBg = color;
+            document.getElementById('btn-white').style.borderColor = color === 'white' ? 'black' : 'transparent';
+            document.getElementById('btn-blue').style.borderColor = color === 'blue' ? 'black' : 'transparent';
         }
 
+        function openModal(art = null) {
+            editingId = art ? art.id : null;
+            document.getElementById('modal-title').innerText = art ? "Rediger sak" : "Opprett sak";
+            document.getElementById('t-in').value = art ? art.title : "";
+            document.getElementById('l-in').value = art ? art.lead : "";
+            contentBlocks = art ? art.blocks : [];
+            setBg(art ? (art.bg_color || 'white') : 'white');
+            renderBuilder();
+            document.getElementById('post-modal').classList.remove('hidden');
+        }
+
+        function addBlock(type) { contentBlocks.push({ type, value: '', extra: '' }); renderBuilder(); }
+        
         function renderBuilder() {
-            const container = document.getElementById('content-builder');
-            container.innerHTML = contentBlocks.map((b, i) => `
-                <div class="p-5 bg-gray-50 rounded-[24px] relative border border-gray-100 mb-4">
-                    <button onclick="contentBlocks.splice(${i}, 1); renderBuilder()" class="absolute top-4 right-4 text-gray-400 font-black text-xs">FJERN</button>
-                    ${b.type === 'text' ? 
-                        `<textarea oninput="contentBlocks[${i}].value = this.value" class="w-full bg-transparent outline-none h-32 text-gray-700 font-medium">${b.value}</textarea>` :
-                        `<input type="text" oninput="contentBlocks[${i}].value = this.value" placeholder="Bilde-URL" class="w-full bg-transparent outline-none font-bold mb-4" value="${b.value}">
-                         <input type="text" oninput="contentBlocks[${i}].extra = this.value" placeholder="Fotokreditt" class="w-full bg-transparent outline-none text-xs font-bold opacity-50" value="${b.extra}">`
-                    }
+            document.getElementById('content-builder').innerHTML = contentBlocks.map((b, i) => `
+                <div class="p-4 bg-gray-50 rounded-xl relative border mb-2">
+                    <button onclick="contentBlocks.splice(${i}, 1); renderBuilder()" class="absolute top-2 right-2 text-[10px] font-bold">FJERN</button>
+                    ${b.type === 'text' ? `<textarea oninput="contentBlocks[${i}].value=this.value" class="w-full bg-transparent outline-none h-20">${b.value}</textarea>` :
+                    `<input type="text" oninput="contentBlocks[${i}].value=this.value" value="${b.value}" placeholder="Bilde-URL" class="w-full bg-transparent font-bold">`}
                 </div>
             `).join('');
         }
@@ -199,67 +139,58 @@
         async function publish() {
             const title = document.getElementById('t-in').value;
             const lead = document.getElementById('l-in').value;
-            if(!title || contentBlocks.length === 0) return alert("Mangler innhold!");
+            const firstImg = contentBlocks.find(b => b.type === 'image')?.value || '';
 
-            const firstImg = contentBlocks.find(b => b.type === 'image')?.value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200';
+            const payload = { title, lead, blocks: contentBlocks, mainImg: firstImg, bg_color: selectedBg };
 
-            const { error } = await _supabase.from('articles').insert([{ 
-                title, lead, blocks: contentBlocks, mainImg: firstImg 
-            }]);
-
-            if (error) alert("Sikkerhetsfeil: " + error.message);
-            else location.reload();
-        }
-
-        async function deleteArt(id) {
-            if(confirm("Slette artikkelen?")) {
-                const { error } = await _supabase.from('articles').delete().eq('id', id);
-                if (error) alert("Kunne ikke slette: " + error.message);
-                else fetchArticles();
+            let error;
+            if (editingId) {
+                const { error: err } = await _supabase.from('articles').update(payload).eq('id', editingId);
+                error = err;
+            } else {
+                const { error: err } = await _supabase.from('articles').insert([payload]);
+                error = err;
             }
+
+            if (error) alert(error.message); else location.reload();
         }
 
         function renderFrontPage() {
-            const grid = document.getElementById('news-grid');
-            grid.innerHTML = articles.map((art, i) => `
-                <div class="article-card ${i === 0 ? 'md:col-span-2' : ''}">
-                    <div onclick="openArticle(${art.id})" class="cursor-pointer group flex-grow">
-                        <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
+            document.getElementById('news-grid').innerHTML = articles.map((art, i) => `
+                <div class="article-card ${art.bg_color === 'blue' ? 'bg-fjellstad-blue' : 'bg-white'} ${i === 0 ? 'md:col-span-2' : ''}">
+                    <div onclick="openArticle(${art.id})" class="cursor-pointer flex-grow">
+                        <img src="${art.mainImg}" class="${i === 0 ? 'h-96' : 'h-64'} w-full object-cover">
                         <div class="p-8">
-                            <h2 class="serif ${i === 0 ? 'text-4xl md:text-5xl' : 'text-2xl'} font-bold mb-4">${art.title}</h2>
-                            <p class="text-gray-500 line-clamp-2">${art.lead || ''}</p>
+                            <h2 class="serif ${i === 0 ? 'text-4xl' : 'text-2xl'} font-bold mb-4">${art.title}</h2>
+                            <p class="opacity-70 line-clamp-2">${art.lead || ''}</p>
                         </div>
                     </div>
-                    ${isAdmin ? `<button onclick="deleteArt(${art.id})" class="m-6 text-[10px] font-black text-red-600 uppercase border border-red-100 py-2 rounded-lg">Slett</button>` : ''}
+                    ${isAdmin ? `
+                        <div class="p-4 flex gap-2 border-t ${art.bg_color === 'blue' ? 'border-white/20' : 'border-black/5'}">
+                            <button onclick="openModal(${JSON.stringify(art).replace(/"/g, '&quot;')})" class="flex-1 py-2 bg-black/10 rounded-lg text-[10px] font-bold uppercase">Rediger</button>
+                            <button onclick="deleteArt(${art.id})" class="flex-1 py-2 bg-red-600/10 text-red-600 rounded-lg text-[10px] font-bold uppercase">Slett</button>
+                        </div>` : ''}
                 </div>
             `).join('');
         }
 
         function openArticle(id) {
             const art = articles.find(a => a.id === id);
+            const view = document.getElementById('article-view');
+            view.className = `max-w-3xl mx-auto px-4 py-20 min-h-screen ${art.bg_color === 'blue' ? 'bg-fjellstad-blue' : 'bg-white'}`;
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('header-visuals').classList.add('hidden');
-            document.getElementById('article-view').classList.remove('hidden');
+            view.classList.remove('hidden');
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
             document.getElementById('article-content-area').innerHTML = art.blocks.map(b => 
-                b.type === 'text' ? `<p class="text-xl md:text-2xl leading-relaxed text-gray-800">${b.value}</p>` :
-                `<figure><img src="${b.value}" class="w-full rounded-2xl border-2 border-black"><figcaption class="text-xs opacity-30 mt-2">${b.extra || ''}</figcaption></figure>`
+                b.type === 'text' ? `<p>${b.value}</p>` : `<img src="${b.value}" class="w-full rounded-2xl border-2 border-black">`
             ).join('');
-            window.scrollTo(0,0);
         }
 
-        function openModal() { document.getElementById('post-modal').classList.remove('hidden'); contentBlocks = []; renderBuilder(); }
+        async function deleteArt(id) { if(confirm("Slette?")) await _supabase.from('articles').delete().eq('id', id); location.reload(); }
         function closeModal() { document.getElementById('post-modal').classList.add('hidden'); }
-        function openTips() { document.getElementById('tips-modal').classList.remove('hidden'); }
-        function closeTips() { document.getElementById('tips-modal').classList.add('hidden'); }
         function closeArticle() { location.reload(); }
-
-        async function submitTips() {
-            const msg = `🚨 **TIPS:** ${document.getElementById('tips-body').value}`;
-            await fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: msg}) });
-            alert("Takk!"); closeTips();
-        }
     </script>
 </body>
 </html>
