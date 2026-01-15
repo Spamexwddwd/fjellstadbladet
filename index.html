@@ -8,20 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600;700;900&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; margin: 0; }
         .serif { font-family: 'Playfair Display', serif; }
         .newspaper-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: -2px; }
-        
-        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; }
+        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; cursor: pointer; }
         .article-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        
-        .bg-fjellstad-blue { background-color: #001f3f !important; color: white !important; }
-        .bg-fjellstad-blue p, .bg-fjellstad-blue h2, .bg-fjellstad-blue h1 { color: white !important; }
-
         .tag-pill { background-color: #f3f4f6; color: #1f2937; padding: 8px 16px; border-radius: 9999px; font-size: 0.9rem; font-weight: 600; }
         .footer-dark { background-color: #001529; color: white; padding: 80px 0 40px 0; margin-top: 100px; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -71,26 +65,26 @@
     </article>
 
     <footer class="footer-dark">
-        <div class="footer-grid">
-            <div class="footer-section">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div>
                 <h3 class="font-black uppercase text-xs mb-4 opacity-50">Tips oss</h3>
-                <ul class="text-sm space-y-2">
-                    <li class="cursor-pointer underline" onclick="openTips()">Send inn tips</li>
-                    <li>Tipstelefon: 05150</li>
-                </ul>
+                <p class="text-sm opacity-70 mb-2">Har du en sak? Vi hører fra deg.</p>
+                <button onclick="openTips()" class="underline text-sm font-bold">Send tips her</button>
             </div>
-            <div class="footer-section">
-                <h3 class="font-black uppercase text-xs mb-4 opacity-50">Adresse</h3>
-                <ul class="text-sm space-y-2">
-                    <li>Nykkebakken 2</li>
-                    <li>4013 Fjellstad</li>
-                </ul>
+            <div>
+                <h3 class="font-black uppercase text-xs mb-4 opacity-50">Kontakt</h3>
+                <p class="text-sm opacity-70">Nykkebakken 2, 4013 Fjellstad</p>
+                <p class="text-sm opacity-70">Sentralbord: 05150</p>
+            </div>
+            <div>
+                <h3 class="font-black uppercase text-xs mb-4 opacity-50">Om oss</h3>
+                <p class="text-[10px] uppercase tracking-widest opacity-40">© Fjellstadbladet 2026. All kopiering er forbudt.</p>
             </div>
         </div>
     </footer>
 
     <div id="post-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10 relative">
+        <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10">
             <h2 id="modal-title" class="serif text-3xl font-bold mb-6">Ny sak</h2>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -105,7 +99,7 @@
                     <button onclick="addBlock('image')" class="flex-1 bg-white border py-3 rounded-xl font-bold text-[10px] uppercase">+ Bilde</button>
                 </div>
                 <div class="flex gap-4 pt-4">
-                    <button onclick="publish()" id="publish-btn" class="flex-[2] bg-red-600 text-white font-black py-4 rounded-xl uppercase">Lagre</button>
+                    <button onclick="publish()" id="publish-btn" class="flex-[2] bg-red-600 text-white font-black py-4 rounded-xl uppercase tracking-widest">Lagre og publiser</button>
                     <button onclick="closeModal()" class="flex-1 border-2 border-black rounded-xl font-bold uppercase text-[10px]">Lukk</button>
                 </div>
             </div>
@@ -114,10 +108,10 @@
 
     <div id="tips-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
         <div class="bg-white border-2 border-black rounded-[40px] p-10 max-w-md w-full">
-            <h2 class="serif text-4xl font-bold mb-6">Tips oss</h2>
+            <h2 class="serif text-4xl font-bold mb-4">Tips oss</h2>
             <textarea id="tips-body" placeholder="Hva skjer?" class="w-full bg-gray-50 p-4 rounded-xl h-32 outline-none mb-4"></textarea>
-            <button onclick="alert('Takk for tipset!'); closeTips()" class="w-full bg-black text-white font-black py-5 rounded-2xl uppercase">Send tips</button>
-            <button onclick="closeTips()" class="w-full text-xs font-bold opacity-30 mt-4">Avbryt</button>
+            <button onclick="submitTips()" class="w-full bg-black text-white font-black py-5 rounded-2xl uppercase">Send tips</button>
+            <button onclick="closeTips()" class="w-full text-[10px] font-black uppercase opacity-30 mt-6 tracking-widest">Avbryt</button>
         </div>
     </div>
 
@@ -125,13 +119,16 @@
         const SUPABASE_URL = 'https://joyxkghutpwxrleafaxv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const DISCORD_WEBHOOK = "DIN_WEBHOOK_HER";
 
-        // --- KONFIGURASJON (Endre disse som du vil) ---
+        // --- KONFIGURASJON ---
         const JOURNALISTS = [
             { name: "Camilla Bjørheim", img: "https://i.pravatar.cc/150?u=camilla" },
-            { name: "Lisa Marie", img: "https://i.pravatar.cc/150?u=lisa" }
+            { name: "Lisa Marie", img: "https://i.pravatar.cc/150?u=lisa" },
+            { name: "Fjellstad Redaksjon", img: "https://i.pravatar.cc/150?u=red" }
         ];
-        const TAGS = ["Fjellstad", "Nyhet", "Blålys", "Sport", "Oalsgata"];
+
+        const TAG_OPTIONS = ["Fjellstad", "Nyhet", "Blålys", "Sport", "Kultur", "Oalsgata"];
 
         let articles = [];
         let contentBlocks = [];
@@ -139,13 +136,13 @@
         let isAdmin = false;
 
         window.onload = async () => {
-            // Fyll dropdowns
+            // Fyll menyer
             const aS = document.getElementById('author-select');
             JOURNALISTS.forEach((j, i) => aS.innerHTML += `<option value="${i}">${j.name}</option>`);
             const tS = document.getElementById('tag-select');
-            TAGS.forEach(t => tS.innerHTML += `<option value="${t}">${t}</option>`);
+            TAG_OPTIONS.forEach(t => tS.innerHTML += `<option value="${t}">${t}</option>`);
 
-            // URL Vasker
+            // URL RYDDER (Viktig!)
             setInterval(() => {
                 if(window.location.hash.includes('access_token')) window.history.replaceState(null, "", window.location.origin + window.location.pathname);
             }, 100);
@@ -166,17 +163,16 @@
 
         function renderFrontPage() {
             document.getElementById('news-grid').innerHTML = articles.map((art, i) => `
-                <div class="article-card bg-white ${i === 0 ? 'md:col-span-2' : ''}">
-                    <div onclick="openArticle(${art.id})" class="cursor-pointer flex-grow">
-                        <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
-                        <div class="p-10">
-                            <h2 class="serif ${i === 0 ? 'text-4xl md:text-6xl' : 'text-2xl md:text-3xl'} font-bold mb-6">${art.title}</h2>
-                            <p class="opacity-70 line-clamp-3">${art.lead || ''}</p>
-                        </div>
+                <div class="article-card bg-white ${i === 0 ? 'md:col-span-2' : ''}" onclick="openArticle(${art.id})">
+                    <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
+                    <div class="p-10 flex-grow">
+                        <h2 class="serif ${i === 0 ? 'text-4xl md:text-6xl' : 'text-2xl md:text-3xl'} font-bold mb-6">${art.title}</h2>
+                        <p class="opacity-70 line-clamp-3">${art.lead || ''}</p>
                     </div>
-                    ${isAdmin ? `<div class="p-4 border-t flex gap-2">
-                        <button onclick='editArt(${JSON.stringify(art)})' class="flex-1 bg-gray-100 py-2 rounded font-bold text-[10px] uppercase">Rediger</button>
-                        <button onclick="deleteArt(${art.id})" class="flex-1 bg-red-50 text-red-600 py-2 rounded font-bold text-[10px] uppercase">Slett</button>
+                    ${isAdmin ? `
+                    <div class="p-4 bg-gray-50 flex gap-2 border-t" onclick="event.stopPropagation()">
+                        <button onclick='editArt(${JSON.stringify(art)})' class="flex-1 py-2 text-[10px] font-bold uppercase border border-black rounded-lg">Rediger</button>
+                        <button onclick="deleteArt(${art.id})" class="flex-1 py-2 text-[10px] font-bold uppercase bg-red-600 text-white rounded-lg">Slett</button>
                     </div>` : ''}
                 </div>
             `).join('');
@@ -191,13 +187,14 @@
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
 
-            // Datoer (Publisert/Oppdatert format)
-            const dateStr = new Date(art.created_at).toLocaleString('no-NO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '');
-            document.getElementById('pub-date').innerText = `Publisert: ${dateStr}`;
-            document.getElementById('upd-date').innerText = `Oppdatert: ${dateStr}`;
-            document.getElementById('view-tags').innerHTML = `<span class="tag-pill">${art.tags || 'Fjellstad'}</span>`;
+            // Datoer
+            const opt = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            const date = new Date(art.created_at).toLocaleString('no-NO', opt).replace(',', '');
+            document.getElementById('pub-date').innerText = `Publisert: ${date}`;
+            document.getElementById('upd-date').innerText = `Oppdatert: ${date}`;
+            document.getElementById('view-tags').innerHTML = `<span class="tag-pill">${art.tags || 'Nyhet'}</span>`;
 
-            // Innhold + Journalist under første bilde
+            // Journalist under første bilde
             const author = art.author_data || JOURNALISTS[0];
             const authorHtml = `<div class="flex items-center gap-4 my-10 border-t border-b py-6">
                 <img src="${author.img}" class="w-16 h-16 rounded-full border-2 border-black object-cover">
@@ -245,14 +242,16 @@
 
         function editArt(art) {
             editingId = art.id;
+            document.getElementById('modal-title').innerText = "Rediger sak";
             document.getElementById('t-in').value = art.title;
             document.getElementById('l-in').value = art.lead;
+            document.getElementById('tag-select').value = art.tags || "Nyhet";
             contentBlocks = art.blocks;
             renderBuilder();
             openModal();
         }
 
-        async function deleteArt(id) { if(confirm("Slett?")) { await _supabase.from('articles').delete().eq('id', id); location.reload(); } }
+        async function deleteArt(id) { if(confirm("Slette sak permanent?")) { await _supabase.from('articles').delete().eq('id', id); location.reload(); } }
         function openModal() { document.getElementById('post-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('post-modal').classList.add('hidden'); editingId = null; }
         function openTips() { document.getElementById('tips-modal').classList.remove('hidden'); }
@@ -260,6 +259,7 @@
         function closeArticle() { location.reload(); }
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord' }); }
         async function logout() { await _supabase.auth.signOut(); location.reload(); }
+        async function submitTips() { alert("Tips mottatt!"); closeTips(); }
     </script>
 </body>
 </html>
