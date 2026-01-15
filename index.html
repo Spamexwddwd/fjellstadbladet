@@ -168,8 +168,18 @@
         let editingId = null;
         let selectedBg = 'white';
 
-        window.onload = async () => { await fetchArticles(); checkUser(); };
+        window.onload = async () => {
+    // 1. Hent artikler og sjekk bruker som vanlig
+    await fetchArticles();
+    await checkUser();
 
+    // 2. RYDD URL: Fjerner access_token og rusk fra adresselinjen uten å laste siden på nytt
+    if (window.location.hash || window.location.search.includes('code=')) {
+        // Dette fjerner alt etter domenenavnet (f.eks. alt etter .no/ eller .com/)
+        window.history.replaceState(null, null, window.location.pathname);
+    }
+};
+        
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin } }); }
         async function logout() { await _supabase.auth.signOut(); location.reload(); }
         
