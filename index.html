@@ -8,13 +8,43 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;600;700;900&display=swap');
+        
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; }
         .serif { font-family: 'Playfair Display', serif; }
         .newspaper-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: -2px; }
-        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; background: white; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; }
+        
+        .article-card {
+            border: 2px solid black;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
         .article-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .btn-tips { background: black; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px; font-weight: 900; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.1em; }
-        .admin-badge { background: #fefce8; border: 1px solid #fef08a; padding: 0.5rem 1rem; border-radius: 12px; }
+        .article-card img { width: 100%; object-fit: cover; border: none; }
+
+        .btn-tips {
+            background: black;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            transition: all 0.2s;
+        }
+
+        .admin-badge {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+        }
     </style>
 </head>
 <body>
@@ -32,7 +62,9 @@
 
     <div id="header-visuals" class="text-center py-16">
         <h1 class="newspaper-title italic underline decoration-2 underline-offset-8 cursor-pointer" onclick="location.reload()">Fjellstadbladet</h1>
-        <div class="inline-block bg-black text-[#d4af37] px-8 py-2 mt-12 text-[10px] font-black tracking-[0.5em] uppercase rounded-full">❧ Årets Mediehus ❧</div>
+        <div class="inline-block bg-black text-[#d4af37] px-8 py-2 mt-12 text-[10px] font-black tracking-[0.5em] uppercase rounded-full">
+            ❧ Årets Mediehus ❧
+        </div>
     </div>
 
     <main id="main-view" class="max-w-7xl mx-auto px-4 pb-20">
@@ -44,11 +76,15 @@
             </div>
             <button onclick="openModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase hover:bg-red-700 transition">Lag ny artikkel</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10" id="news-grid"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10" id="news-grid">
+            </div>
     </main>
 
     <article id="article-view" class="hidden max-w-3xl mx-auto px-4 py-20 min-h-screen">
-        <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase tracking-widest opacity-40 hover:opacity-100 transition flex items-center gap-2">Tilbake til forsiden</button>
+        <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase tracking-widest opacity-40 hover:opacity-100 transition flex items-center gap-2">
+            Tilbake til forsiden
+        </button>
         <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tighter"></h1>
         <p id="view-lead" class="text-2xl text-gray-600 mb-16 leading-relaxed font-medium italic border-l-4 border-black pl-8"></p>
         <div id="article-content-area" class="space-y-12"></div>
@@ -58,9 +94,9 @@
         <div class="bg-white border-2 border-black rounded-[40px] p-10 max-w-md w-full">
             <h2 class="serif text-4xl font-bold mb-2">Tips oss</h2>
             <div class="space-y-4">
-                <input type="text" id="tips-contact" placeholder="Navn / Kontakt" class="w-full bg-gray-50 p-5 rounded-2xl outline-none">
-                <textarea id="tips-body" placeholder="Hva skjer?" class="w-full bg-gray-50 p-5 rounded-2xl h-40 outline-none"></textarea>
-                <button onclick="submitTips()" class="w-full bg-black text-white font-black py-6 rounded-3xl uppercase">Send tips</button>
+                <input type="text" id="tips-contact" placeholder="Navn / Kontaktinfo" class="w-full bg-gray-50 p-5 rounded-2xl outline-none">
+                <textarea id="tips-body" placeholder="Hva skjer i Fjellstad?" class="w-full bg-gray-50 p-5 rounded-2xl h-40 outline-none"></textarea>
+                <button onclick="submitTips()" class="w-full bg-black text-white font-black py-6 rounded-3xl uppercase tracking-widest text-sm shadow-xl">Send tips</button>
                 <button onclick="closeTips()" class="w-full text-xs font-bold opacity-30 mt-4">Lukk</button>
             </div>
         </div>
@@ -70,31 +106,32 @@
         <div class="bg-white border-2 border-black rounded-[48px] p-10 max-w-2xl w-full my-10 relative">
             <h2 class="serif text-4xl font-bold mb-8">Opprett sak</h2>
             <div class="space-y-6">
-                <input type="text" id="t-in" placeholder="Tittel" class="w-full border-b-2 py-4 text-3xl font-bold outline-none focus:border-black">
-                <textarea id="l-in" placeholder="Ingress..." class="w-full border-b-2 py-4 text-lg outline-none focus:border-black"></textarea>
+                <input type="text" id="t-in" placeholder="Tittel" class="w-full border-b-2 border-gray-100 py-4 text-3xl font-bold outline-none focus:border-black transition">
+                <textarea id="l-in" placeholder="Ingress..." class="w-full border-b-2 border-gray-100 py-4 text-lg outline-none focus:border-black transition"></textarea>
+                
                 <div id="content-builder" class="space-y-4"></div>
+
                 <div class="flex gap-4">
-                    <button onclick="addBlock('text')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase">+ Tekst</button>
-                    <button onclick="addBlock('image')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase">+ Bilde</button>
+                    <button onclick="addBlock('text')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">+ Tekst</button>
+                    <button onclick="addBlock('image')" class="flex-1 bg-gray-100 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">+ Bilde</button>
                 </div>
+
                 <div class="flex gap-4 pt-10">
-                    <button id="publish-btn" onclick="publish()" class="flex-[2] bg-red-600 text-white font-black py-6 rounded-[30px] uppercase shadow-xl">Publiser sak</button>
-                    <button onclick="closeModal()" class="flex-1 border-2 border-black font-black py-6 rounded-[30px] uppercase text-[10px]">Avbryt</button>
+                    <button id="publish-btn" onclick="publish()" class="flex-[2] bg-red-600 text-white font-black py-6 rounded-[30px] uppercase tracking-widest shadow-xl">Publiser sak</button>
+                    <button onclick="closeModal()" class="flex-1 border-2 border-black font-black py-6 rounded-[30px] uppercase text-[10px] tracking-widest">Avbryt</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const CLIENT_ID = '1461112663172976724';
-        const REDIRECT_URI = window.location.origin + '/';
-        const ADMIN_ID = '1158061375604662352';
-        const WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_URL';
-
-        // --- SUPABASE ---
+        // --- KONFIGURASJON ---
         const SUPABASE_URL = 'https://joyxkghutpwxrleafaxv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const ADMIN_DISCORD_ID = '1158061375604662352'; 
+        const WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_URL'; 
 
         let articles = [];
         let isAdmin = false;
@@ -102,49 +139,59 @@
 
         window.onload = async () => {
             await fetchArticles();
-            checkAuth();
+            checkUser();
         };
+
+        // Logger inn via Supabase Auth
+        async function loginWithDiscord() {
+            const { data, error } = await _supabase.auth.signInWithOAuth({
+                provider: 'discord',
+                options: { redirectTo: window.location.origin }
+            });
+            if (error) console.error("Login feil:", error.message);
+        }
+
+        // Sjekker om brukeren er logget inn og er admin
+        async function checkUser() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            
+            if (user) {
+                // Sjekker Discord-ID i metadataene
+                if (user.user_metadata.provider_id === ADMIN_DISCORD_ID) {
+                    isAdmin = true;
+                    document.getElementById('admin-ui').classList.remove('hidden');
+                    document.getElementById('admin-name').innerText = (user.user_metadata.full_name || user.email).toUpperCase();
+                    document.getElementById('auth-section').innerHTML = `<span class="text-xs font-black uppercase">Redaktør: ${user.user_metadata.full_name || 'Admin'}</span>`;
+                    renderFrontPage(); 
+                }
+            }
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            location.reload();
+        }
 
         async function fetchArticles() {
             const { data, error } = await _supabase.from('articles').select('*').order('created_at', { ascending: false });
             if (data) { articles = data; renderFrontPage(); }
         }
 
-        function checkAuth() {
-            const fragment = new URLSearchParams(window.location.hash.slice(1));
-            let token = fragment.get('access_token') || localStorage.getItem('discord_token');
-            if (token) {
-                localStorage.setItem('discord_token', token);
-                window.history.replaceState({}, document.title, "/");
-                fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } })
-                .then(r => r.json())
-                .then(user => {
-                    if (user.id === ADMIN_ID) {
-                        isAdmin = true;
-                        document.getElementById('admin-ui').classList.remove('hidden');
-                        document.getElementById('admin-name').innerText = user.username.toUpperCase();
-                        renderFrontPage();
-                    }
-                });
-            }
+        function addBlock(type) {
+            contentBlocks.push({ type, value: '', extra: '' });
+            renderBuilder();
         }
-
-        function loginWithDiscord() {
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
-        }
-
-        function logout() { localStorage.removeItem('discord_token'); location.reload(); }
-
-        function addBlock(type) { contentBlocks.push({ type, value: '', extra: '' }); renderBuilder(); }
 
         function renderBuilder() {
             const container = document.getElementById('content-builder');
             container.innerHTML = contentBlocks.map((b, i) => `
                 <div class="p-5 bg-gray-50 rounded-[24px] relative border border-gray-100 mb-4">
-                    <button onclick="contentBlocks.splice(${i}, 1); renderBuilder()" class="absolute top-4 right-4 text-gray-400 hover:text-black font-black text-xs">FJERN</button>
-                    ${b.type === 'text' ? `<textarea oninput="contentBlocks[${i}].value = this.value" class="w-full bg-transparent outline-none h-32">${b.value}</textarea>` :
-                    `<input type="text" oninput="contentBlocks[${i}].value = this.value" placeholder="Bilde URL" class="w-full bg-transparent outline-none font-bold mb-2" value="${b.value}">
-                     <input type="text" oninput="contentBlocks[${i}].extra = this.value" placeholder="Fotokreditt" class="w-full bg-transparent outline-none text-xs opacity-50" value="${b.extra}">`}
+                    <button onclick="contentBlocks.splice(${i}, 1); renderBuilder()" class="absolute top-4 right-4 text-gray-400 font-black text-xs">FJERN</button>
+                    ${b.type === 'text' ? 
+                        `<textarea oninput="contentBlocks[${i}].value = this.value" class="w-full bg-transparent outline-none h-32 text-gray-700 font-medium">${b.value}</textarea>` :
+                        `<input type="text" oninput="contentBlocks[${i}].value = this.value" placeholder="Bilde-URL" class="w-full bg-transparent outline-none font-bold mb-4" value="${b.value}">
+                         <input type="text" oninput="contentBlocks[${i}].extra = this.value" placeholder="Fotokreditt" class="w-full bg-transparent outline-none text-xs font-bold opacity-50" value="${b.extra}">`
+                    }
                 </div>
             `).join('');
         }
@@ -152,15 +199,23 @@
         async function publish() {
             const title = document.getElementById('t-in').value;
             const lead = document.getElementById('l-in').value;
+            if(!title || contentBlocks.length === 0) return alert("Mangler innhold!");
+
             const firstImg = contentBlocks.find(b => b.type === 'image')?.value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200';
-            const { error } = await _supabase.from('articles').insert([{ title, lead, blocks: contentBlocks, mainImg: firstImg }]);
-            if (error) alert("Feil: " + error.message); else location.reload();
+
+            const { error } = await _supabase.from('articles').insert([{ 
+                title, lead, blocks: contentBlocks, mainImg: firstImg 
+            }]);
+
+            if (error) alert("Sikkerhetsfeil: " + error.message);
+            else location.reload();
         }
 
         async function deleteArt(id) {
-            if(confirm("Slette artikkelen permanent?")) {
+            if(confirm("Slette artikkelen?")) {
                 const { error } = await _supabase.from('articles').delete().eq('id', id);
-                if (error) alert("Du har ikke tilgang til å slette!"); else fetchArticles();
+                if (error) alert("Kunne ikke slette: " + error.message);
+                else fetchArticles();
             }
         }
 
@@ -175,7 +230,7 @@
                             <p class="text-gray-500 line-clamp-2">${art.lead || ''}</p>
                         </div>
                     </div>
-                    ${isAdmin ? `<button onclick="deleteArt(${art.id})" class="m-6 text-[10px] font-black text-red-600 uppercase border border-red-100 py-2 rounded-lg">Slett artikkel</button>` : ''}
+                    ${isAdmin ? `<button onclick="deleteArt(${art.id})" class="m-6 text-[10px] font-black text-red-600 uppercase border border-red-100 py-2 rounded-lg">Slett</button>` : ''}
                 </div>
             `).join('');
         }
@@ -189,7 +244,7 @@
             document.getElementById('view-lead').innerText = art.lead || '';
             document.getElementById('article-content-area').innerHTML = art.blocks.map(b => 
                 b.type === 'text' ? `<p class="text-xl md:text-2xl leading-relaxed text-gray-800">${b.value}</p>` :
-                `<figure><img src="${b.value}" class="w-full rounded-2xl border-2 border-black"><figcaption class="text-[10px] font-black uppercase text-right opacity-30 mt-2">${b.extra || 'Fjellstadbladet'}</figcaption></figure>`
+                `<figure><img src="${b.value}" class="w-full rounded-2xl border-2 border-black"><figcaption class="text-xs opacity-30 mt-2">${b.extra || ''}</figcaption></figure>`
             ).join('');
             window.scrollTo(0,0);
         }
@@ -201,7 +256,7 @@
         function closeArticle() { location.reload(); }
 
         async function submitTips() {
-            const msg = `🚨 **NYTT TIPS**\n**Kontakt:** ${document.getElementById('tips-contact').value}\n**Innhold:** ${document.getElementById('tips-body').value}`;
+            const msg = `🚨 **TIPS:** ${document.getElementById('tips-body').value}`;
             await fetch(WEBHOOK_URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: msg}) });
             alert("Takk!"); closeTips();
         }
