@@ -20,7 +20,13 @@
         .bg-fjellstad-blue p, .bg-fjellstad-blue h2, .bg-fjellstad-blue h1 { color: white !important; }
 
         .tag-pill { background-color: #f3f4f6; color: #1f2937; padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
+        .bg-fjellstad-blue .tag-pill { background-color: rgba(255,255,255,0.2); color: white; }
+
         .footer-dark { background-color: #001529; color: white; padding: 80px 0 40px 0; margin-top: 100px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .footer-section h3 { font-weight: 900; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; margin-bottom: 20px; opacity: 0.9; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li { margin-bottom: 10px; font-size: 0.9rem; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -48,6 +54,7 @@
             </div>
             <button onclick="openModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase shadow-lg">Lag ny sak</button>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10" id="news-grid"></div>
     </main>
 
@@ -70,15 +77,53 @@
             <div id="article-content-area" class="space-y-12 text-xl leading-relaxed"></div>
 
             <div class="mt-16 pt-8 border-t border-gray-100">
-                <p class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Tags</p>
+                <p class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Emneknagger</p>
                 <div id="view-tags" class="flex flex-wrap gap-2"></div>
             </div>
         </div>
     </article>
 
+    <footer class="footer-dark">
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h3>Tips oss</h3>
+                <ul>
+                    <li class="cursor-pointer underline" onclick="openTips()">Send inn tips</li>
+                    <li>Tipstelefon: 05150</li>
+                    <li>tips@fjellstadbladet.no</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <ul>
+                    <li>Kundesenter: 52 90 08 10</li>
+                    <li>Kundeservice</li>
+                    <li>Redaksjonen</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Redaksjonen</h3>
+                <ul>
+                    <li>Sjefredaktør: <strong>Lisa Marie</strong></li>
+                    <li>Nyhetsredaktør: Per Person</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Adresse</h3>
+                <ul>
+                    <li>Nykkebakken 2</li>
+                    <li>4013 Fjellstad</li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-[1200px] mx-auto mt-20 px-4 pt-10 border-t border-white/10 opacity-50 text-[10px] uppercase tracking-widest text-center">
+            <p>© Fjellstadbladet – All bruk av innhold må avtales.</p>
+        </div>
+    </footer>
+
     <div id="post-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10 relative">
-            <h2 class="serif text-3xl font-bold mb-6">Opprett sak</h2>
+            <h2 id="modal-title" class="serif text-3xl font-bold mb-6">Opprett sak</h2>
             
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -87,9 +132,17 @@
                         <select id="author-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none"></select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold uppercase">Tags (separer med komma)</label>
-                        <input type="text" id="tags-in" placeholder="f.eks. Fjellstad, Nyhet" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
+                        <label class="text-[10px] font-bold uppercase">Stil</label>
+                        <select id="bg-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
+                            <option value="white">Hvit (Standard)</option>
+                            <option value="blue">Mørkeblå (Viktig)</option>
+                        </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold uppercase">Tags (separer med komma)</label>
+                    <input type="text" id="tags-in" placeholder="f.eks. Fjellstad, Nyhet" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
                 </div>
 
                 <input type="text" id="t-in" placeholder="Tittel" class="w-full text-2xl font-bold border-b p-2 outline-none">
@@ -103,9 +156,21 @@
                 </div>
 
                 <div class="flex gap-4 pt-6">
-                    <button onclick="publish()" class="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl uppercase">Publiser</button>
+                    <button onclick="publish()" id="publish-btn" class="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl uppercase">Lagre og publiser</button>
                     <button onclick="closeModal()" class="flex-1 border-2 border-black rounded-2xl font-bold uppercase text-[10px]">Lukk</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tips-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-black rounded-[40px] p-10 max-w-md w-full">
+            <h2 class="serif text-4xl font-bold mb-6">Tips oss</h2>
+            <div class="space-y-4">
+                <input type="text" id="tips-contact" placeholder="Navn/Kontakt (valgfritt)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+                <textarea id="tips-body" placeholder="Hva skjer?" class="w-full bg-gray-50 p-4 rounded-xl h-32 outline-none"></textarea>
+                <button onclick="submitTips()" class="w-full bg-black text-white font-black py-5 rounded-2xl uppercase">Send tips</button>
+                <button onclick="closeTips()" class="w-full text-xs font-bold opacity-30 mt-4">Avbryt</button>
             </div>
         </div>
     </div>
@@ -115,31 +180,32 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- KONFIGURASJON AV JOURNALISTER ---
+        // --- JOURNALIST PROFILER ---
         const JOURNALISTS = [
             { name: "Camilla Bjørheim", img: "https://i.pravatar.cc/150?u=camilla" },
-            { name: "Ola Nordmann", img: "https://i.pravatar.cc/150?u=ola" },
-            { name: "Kari Jensen", img: "https://i.pravatar.cc/150?u=kari" }
+            { name: "Lisa Marie", img: "https://i.pravatar.cc/150?u=lisamarie" },
+            { name: "Fjellstad Redaksjon", img: "https://i.pravatar.cc/150?u=redaksjon" }
         ];
 
         let articles = [];
         let isAdmin = false;
         let contentBlocks = [];
+        let editingId = null;
 
         window.onload = async () => {
-            // Fyll journalist-dropdown
-            const select = document.getElementById('author-select');
-            JOURNALISTS.forEach((j, i) => {
-                select.innerHTML += `<option value="${i}">${j.name}</option>`;
-            });
-
-            // Hardcore URL vasker
+            // URL RYDDER
             const cleanerInterval = setInterval(() => {
                 if (window.location.hash.includes('access_token')) {
                     window.history.replaceState(null, "", window.location.origin + window.location.pathname);
                 }
             }, 100);
             setTimeout(() => clearInterval(cleanerInterval), 3000);
+
+            // Fyll journalist-dropdown
+            const select = document.getElementById('author-select');
+            JOURNALISTS.forEach((j, i) => {
+                select.innerHTML += `<option value="${i}">${j.name}</option>`;
+            });
 
             await fetchArticles();
             await checkUser();
@@ -150,6 +216,9 @@
             if (user && user.user_metadata.provider_id === '1158061375604662352') {
                 isAdmin = true;
                 document.getElementById('admin-ui').classList.remove('hidden');
+                document.getElementById('admin-name').innerText = user.user_metadata.full_name.toUpperCase();
+                document.getElementById('auth-section').innerHTML = `<span class="text-[10px] font-black uppercase bg-black text-white px-3 py-1 rounded-full">Redaktør</span>`;
+                renderFrontPage();
             }
         }
 
@@ -160,7 +229,7 @@
 
         function renderFrontPage() {
             document.getElementById('news-grid').innerHTML = articles.map((art, i) => `
-                <div class="article-card bg-white ${i === 0 ? 'md:col-span-2' : ''}">
+                <div class="article-card ${art.bg_color === 'blue' ? 'bg-fjellstad-blue' : 'bg-white'} ${i === 0 ? 'md:col-span-2' : ''}">
                     <div onclick="openArticle(${art.id})" class="cursor-pointer flex-grow">
                         <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
                         <div class="p-10">
@@ -168,50 +237,58 @@
                             <p class="opacity-70 line-clamp-3 text-lg">${art.lead || ''}</p>
                         </div>
                     </div>
+                    ${isAdmin ? `
+                        <div class="p-4 flex gap-2 border-t border-black/10">
+                            <button onclick='editArt(${JSON.stringify(art).replace(/'/g, "&apos;")})' class="flex-1 py-3 bg-black/5 rounded-xl text-[10px] font-black uppercase">Rediger</button>
+                            <button onclick="deleteArt(${art.id})" class="flex-1 py-3 bg-red-600/5 text-red-600 rounded-xl text-[10px] font-black uppercase">Slett</button>
+                        </div>` : ''}
                 </div>
             `).join('');
         }
 
         function openArticle(id) {
             const art = articles.find(a => a.id === id);
+            const view = document.getElementById('article-view');
+            view.className = `min-h-screen pb-20 ${art.bg_color === 'blue' ? 'bg-fjellstad-blue' : 'bg-white'}`;
+            
             document.getElementById('main-view').classList.add('hidden');
             document.getElementById('header-visuals').classList.add('hidden');
-            document.getElementById('article-view').classList.remove('hidden');
+            view.classList.remove('hidden');
 
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
             
-            // Journalist info
+            // Journalist & Dato
             const author = art.author_data || JOURNALISTS[0];
             document.getElementById('author-name').innerText = author.name;
             document.getElementById('author-img').src = author.img;
-            
             const date = new Date(art.created_at).toLocaleString('no-NO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            document.getElementById('pub-date').innerText = `Publisert: ${date}`;
+            document.getElementById('pub-date').innerText = `Publisert: ${date} kl. ${date.split(' kl. ')[1] || ''}`;
 
-            // Tags (Nederst)
-            const tagsArea = document.getElementById('view-tags');
-            tagsArea.innerHTML = '';
-            const tags = art.tags ? art.tags.split(',') : ["Nyhet"];
-            tags.forEach(t => {
-                tagsArea.innerHTML += `<span class="tag-pill">${t.trim()}</span>`;
-            });
-
+            // Innhold
             document.getElementById('article-content-area').innerHTML = art.blocks.map(b => 
                 b.type === 'text' ? `<p class="mb-8">${b.value}</p>` : `<img src="${b.value}" class="w-full rounded-2xl border-2 border-black mb-2">`
             ).join('');
+
+            // Tags
+            const tagsArea = document.getElementById('view-tags');
+            tagsArea.innerHTML = '';
+            (art.tags || "Fjellstad, Nyhet").split(',').forEach(t => {
+                tagsArea.innerHTML += `<span class="tag-pill">${t.trim()}</span>`;
+            });
+
             window.scrollTo(0,0);
         }
 
-        function addBlock(type) {
-            contentBlocks.push({ type, value: '' });
-            renderBuilder();
-        }
-
+        // --- ADMIN FUNKSJONER ---
+        function addBlock(type) { contentBlocks.push({ type, value: '' }); renderBuilder(); }
+        
         function renderBuilder() {
             document.getElementById('content-builder').innerHTML = contentBlocks.map((b, i) => `
-                <div class="p-4 bg-white rounded-xl border mb-3">
-                    <textarea oninput="contentBlocks[${i}].value=this.value" class="w-full outline-none text-sm">${b.value}</textarea>
+                <div class="p-4 bg-white rounded-xl border mb-3 relative">
+                    <button onclick="contentBlocks.splice(${i}, 1); renderBuilder()" class="absolute top-2 right-2 text-red-500 font-bold text-[9px]">FJERN</button>
+                    <p class="text-[8px] uppercase font-bold opacity-30 mb-2">${b.type}</p>
+                    <textarea oninput="contentBlocks[${i}].value=this.value" class="w-full outline-none text-sm bg-transparent h-20">${b.value}</textarea>
                 </div>
             `).join('');
         }
@@ -222,18 +299,47 @@
                 title: document.getElementById('t-in').value,
                 lead: document.getElementById('l-in').value,
                 blocks: contentBlocks,
-                mainImg: contentBlocks.find(b => b.type === 'image')?.value || '',
+                mainImg: contentBlocks.find(b => b.type === 'image')?.value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200',
                 author_data: JOURNALISTS[authorIdx],
-                tags: document.getElementById('tags-in').value
+                tags: document.getElementById('tags-in').value,
+                bg_color: document.getElementById('bg-select').value
             };
-            await _supabase.from('articles').insert([payload]);
+
+            if (editingId) await _supabase.from('articles').update(payload).eq('id', editingId);
+            else await _supabase.from('articles').insert([payload]);
+            
             location.reload();
         }
 
+        function editArt(art) {
+            editingId = art.id;
+            document.getElementById('modal-title').innerText = "Rediger sak";
+            document.getElementById('t-in').value = art.title;
+            document.getElementById('l-in').value = art.lead;
+            document.getElementById('tags-in').value = art.tags || "";
+            document.getElementById('bg-select').value = art.bg_color || "white";
+            contentBlocks = JSON.parse(JSON.stringify(art.blocks));
+            renderBuilder();
+            openModal();
+        }
+
+        async function deleteArt(id) { if(confirm("Slette sak?")) { await _supabase.from('articles').delete().eq('id', id); location.reload(); } }
+
+        // --- HJELPEFUNKSJONER ---
         function openModal() { document.getElementById('post-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('post-modal').classList.add('hidden'); }
+        function closeModal() { document.getElementById('post-modal').classList.add('hidden'); editingId = null; }
+        function openTips() { document.getElementById('tips-modal').classList.remove('hidden'); }
+        function closeTips() { document.getElementById('tips-modal').classList.add('hidden'); }
         function closeArticle() { location.reload(); }
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord' }); }
+        async function logout() { await _supabase.auth.signOut(); location.reload(); }
+
+        async function submitTips() {
+            const body = document.getElementById('tips-body').value;
+            if(!body) return alert("Skriv et tips!");
+            alert("Takk for tipset!"); 
+            closeTips();
+        }
     </script>
 </body>
 </html>
