@@ -152,7 +152,7 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ADMIN_DISCORD_ID = '1158061375604662352'; 
-        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1461378616892854392/xcpQR8p-CxF6aEf_cMruxwo6bCmBNiXhdFP7iokJuEn1Iz7jGNYNgkxSr_oqrOmp11Q-'; 
+        const WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_URL_HER'; 
 
         let articles = [];
         let isAdmin = false;
@@ -160,21 +160,23 @@
         let editingId = null;
         let selectedBg = 'white';
 
-        // RYDD URL FUNKSJON (Kjører så tidlig som mulig)
-        function cleanUrl() {
-            if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
-                const cleanUri = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUri);
+        // --- KRAFTIG URL RYDDER ---
+        function hardcoreClean() {
+            if (window.location.hash.includes('access_token')) {
+                // Vi fjerner alt etter domenet og pusher en ren URL
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState(null, "", cleanUrl);
+                console.log("URL ble vasket!");
             }
         }
 
         window.onload = async () => {
-            cleanUrl(); // Rydd med en gang
+            // Sjekk hvert 100. millisekund i 3 sekunder om URL-en har stygg tekst
+            const cleanerInterval = setInterval(hardcoreClean, 100);
+            setTimeout(() => clearInterval(cleanerInterval), 3000);
+
             await fetchArticles();
             await checkUser();
-            
-            // Ekstra sjekk etter 500ms i tilfelle Supabase bruker tid
-            setTimeout(cleanUrl, 500);
         };
 
         async function loginWithDiscord() { 
