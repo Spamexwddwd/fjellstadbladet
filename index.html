@@ -65,18 +65,10 @@
             <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8 leading-tight"></h1>
             <p id="view-lead" class="text-2xl mb-8 italic border-l-4 border-current pl-8 opacity-80"></p>
 
-            <div id="view-author" class="flex items-center gap-4 mb-8 border-t border-b py-6">
-                <img id="author-img" src="" class="w-16 h-16 rounded-full object-cover border-2 border-black">
-                <div>
-                    <p class="text-lg font-bold">Av <span id="author-name"></span></p>
-                    <p class="text-sm opacity-60">Journalist</p>
-                    <p id="pub-date" class="text-xs opacity-40 mt-1"></p>
-                </div>
-            </div>
-
             <div id="article-content-area" class="space-y-12 text-xl leading-relaxed"></div>
 
             <div class="mt-16 pt-8 border-t border-gray-100">
+                <p id="pub-date-bottom" class="text-sm font-bold opacity-60 mb-6"></p>
                 <p class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Emneknagger</p>
                 <div id="view-tags" class="flex flex-wrap gap-2"></div>
             </div>
@@ -124,7 +116,6 @@
     <div id="post-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10 relative">
             <h2 id="modal-title" class="serif text-3xl font-bold mb-6">Opprett sak</h2>
-            
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -139,22 +130,17 @@
                         </select>
                     </div>
                 </div>
-
                 <div>
                     <label class="text-[10px] font-bold uppercase">Tags (separer med komma)</label>
                     <input type="text" id="tags-in" placeholder="f.eks. Fjellstad, Nyhet" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
                 </div>
-
                 <input type="text" id="t-in" placeholder="Tittel" class="w-full text-2xl font-bold border-b p-2 outline-none">
                 <textarea id="l-in" placeholder="Ingress..." class="w-full border-b p-2 outline-none h-20"></textarea>
-                
                 <div id="content-builder" class="space-y-4 max-h-64 overflow-y-auto p-4 bg-gray-50 rounded-2xl border"></div>
-                
                 <div class="flex gap-2">
                     <button onclick="addBlock('text')" class="flex-1 bg-white border py-3 rounded-xl font-bold text-[10px] uppercase">+ Tekst</button>
                     <button onclick="addBlock('image')" class="flex-1 bg-white border py-3 rounded-xl font-bold text-[10px] uppercase">+ Bilde</button>
                 </div>
-
                 <div class="flex gap-4 pt-6">
                     <button onclick="publish()" id="publish-btn" class="flex-[2] bg-red-600 text-white font-black py-5 rounded-2xl uppercase">Lagre og publiser</button>
                     <button onclick="closeModal()" class="flex-1 border-2 border-black rounded-2xl font-bold uppercase text-[10px]">Lukk</button>
@@ -180,7 +166,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- JOURNALIST PROFILER ---
         const JOURNALISTS = [
             { name: "Camilla Bjørheim", img: "https://i.pravatar.cc/150?u=camilla" },
             { name: "Lisa Marie", img: "https://i.pravatar.cc/150?u=lisamarie" },
@@ -193,7 +178,6 @@
         let editingId = null;
 
         window.onload = async () => {
-            // URL RYDDER
             const cleanerInterval = setInterval(() => {
                 if (window.location.hash.includes('access_token')) {
                     window.history.replaceState(null, "", window.location.origin + window.location.pathname);
@@ -201,11 +185,8 @@
             }, 100);
             setTimeout(() => clearInterval(cleanerInterval), 3000);
 
-            // Fyll journalist-dropdown
             const select = document.getElementById('author-select');
-            JOURNALISTS.forEach((j, i) => {
-                select.innerHTML += `<option value="${i}">${j.name}</option>`;
-            });
+            JOURNALISTS.forEach((j, i) => select.innerHTML += `<option value="${i}">${j.name}</option>`);
 
             await fetchArticles();
             await checkUser();
@@ -258,29 +239,48 @@
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
             
-            // Journalist & Dato
-            const author = art.author_data || JOURNALISTS[0];
-            document.getElementById('author-name').innerText = author.name;
-            document.getElementById('author-img').src = author.img;
-            const date = new Date(art.created_at).toLocaleString('no-NO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            document.getElementById('pub-date').innerText = `Publisert: ${date} kl. ${date.split(' kl. ')[1] || ''}`;
+            // Dato-format: 15. januar 2026 kl. 14:30
+            const d = new Date(art.created_at);
+            const dateStr = d.toLocaleDateString('no-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('pub-date-bottom').innerText = `Publisert: ${dateStr} kl. ${timeStr}`;
 
-            // Innhold
-            document.getElementById('article-content-area').innerHTML = art.blocks.map(b => 
-                b.type === 'text' ? `<p class="mb-8">${b.value}</p>` : `<img src="${b.value}" class="w-full rounded-2xl border-2 border-black mb-2">`
-            ).join('');
+            // Journalist-system (Plassering under første bilde)
+            const author = art.author_data || JOURNALISTS[0];
+            const authorHtml = `
+                <div class="flex items-center gap-4 my-10 border-t border-b py-6">
+                    <img src="${author.img}" class="w-16 h-16 rounded-full object-cover border-2 border-black">
+                    <div>
+                        <p class="text-lg font-bold">Av ${author.name}</p>
+                        <p class="text-sm opacity-60 italic">Journalist i Fjellstadbladet</p>
+                    </div>
+                </div>`;
+
+            let contentHtml = "";
+            let imgCount = 0;
+            art.blocks.forEach(b => {
+                if (b.type === 'text') {
+                    contentHtml += `<p class="mb-8">${b.value}</p>`;
+                } else {
+                    contentHtml += `<img src="${b.value}" class="w-full rounded-2xl border-2 border-black mb-2 shadow-sm">`;
+                    imgCount++;
+                    if(imgCount === 1) contentHtml += authorHtml; // Setter profil under bilde 1
+                }
+            });
+            if(imgCount === 0) contentHtml = authorHtml + contentHtml; // Hvis null bilder, sett profil øverst
+
+            document.getElementById('article-content-area').innerHTML = contentHtml;
 
             // Tags
             const tagsArea = document.getElementById('view-tags');
             tagsArea.innerHTML = '';
-            (art.tags || "Fjellstad, Nyhet").split(',').forEach(t => {
-                tagsArea.innerHTML += `<span class="tag-pill">${t.trim()}</span>`;
+            (art.tags || "Fjellstad").split(',').forEach(t => {
+                if(t.trim()) tagsArea.innerHTML += `<span class="tag-pill">${t.trim()}</span>`;
             });
 
             window.scrollTo(0,0);
         }
 
-        // --- ADMIN FUNKSJONER ---
         function addBlock(type) { contentBlocks.push({ type, value: '' }); renderBuilder(); }
         
         function renderBuilder() {
@@ -294,20 +294,17 @@
         }
 
         async function publish() {
-            const authorIdx = document.getElementById('author-select').value;
             const payload = {
                 title: document.getElementById('t-in').value,
                 lead: document.getElementById('l-in').value,
                 blocks: contentBlocks,
-                mainImg: contentBlocks.find(b => b.type === 'image')?.value || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200',
-                author_data: JOURNALISTS[authorIdx],
+                mainImg: contentBlocks.find(b => b.type === 'image')?.value || 'https://via.placeholder.com/1200x800',
+                author_data: JOURNALISTS[document.getElementById('author-select').value],
                 tags: document.getElementById('tags-in').value,
                 bg_color: document.getElementById('bg-select').value
             };
-
             if (editingId) await _supabase.from('articles').update(payload).eq('id', editingId);
             else await _supabase.from('articles').insert([payload]);
-            
             location.reload();
         }
 
@@ -323,9 +320,7 @@
             openModal();
         }
 
-        async function deleteArt(id) { if(confirm("Slette sak?")) { await _supabase.from('articles').delete().eq('id', id); location.reload(); } }
-
-        // --- HJELPEFUNKSJONER ---
+        async function deleteArt(id) { if(confirm("Slette?")) { await _supabase.from('articles').delete().eq('id', id); location.reload(); } }
         function openModal() { document.getElementById('post-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('post-modal').classList.add('hidden'); editingId = null; }
         function openTips() { document.getElementById('tips-modal').classList.remove('hidden'); }
@@ -333,13 +328,7 @@
         function closeArticle() { location.reload(); }
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord' }); }
         async function logout() { await _supabase.auth.signOut(); location.reload(); }
-
-        async function submitTips() {
-            const body = document.getElementById('tips-body').value;
-            if(!body) return alert("Skriv et tips!");
-            alert("Takk for tipset!"); 
-            closeTips();
-        }
+        async function submitTips() { alert("Takk!"); closeTips(); }
     </script>
 </body>
 </html>
