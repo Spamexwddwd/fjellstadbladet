@@ -13,11 +13,25 @@
         .serif { font-family: 'Playfair Display', serif; }
         .newspaper-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: -2px; }
         
-        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; }
+        .article-card { border: 2px solid black; border-radius: 20px; overflow: hidden; transition: all 0.3s ease; display: flex; flex-direction: column; height: 100%; position: relative; }
         .article-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
         
         .bg-fjellstad-blue { background-color: #001f3f !important; color: white !important; }
         .bg-fjellstad-blue p, .bg-fjellstad-blue h2, .bg-fjellstad-blue h1 { color: white !important; }
+
+        /* NÅ-merke i rød boks med smooth corners */
+        .now-badge {
+            background-color: #ff0000;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px; /* Smooth corners */
+            font-weight: 900;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
         .tag-pill { background-color: #f3f4f6; color: #1f2937; padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; }
         .bg-fjellstad-blue .tag-pill { background-color: rgba(255,255,255,0.2); color: white; }
@@ -30,6 +44,7 @@
     </style>
 </head>
 <body>
+
     <header class="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <button onclick="openTips()" class="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-[10px] tracking-widest shadow-lg">Tips oss</button>
@@ -41,7 +56,7 @@
 
     <div id="header-visuals" class="text-center py-16">
         <h1 class="newspaper-title italic underline decoration-2 underline-offset-8 cursor-pointer" onclick="location.reload()">Fjellstadbladet</h1>
-        <div class="inline-block bg-black text-[#d4af37] px-8 py-2 mt-8 text-[10px] font-black tracking-[0.5em] uppercase rounded-full">❧ EST 2026 ❧</div>
+        <div class="inline-block bg-black text-[#d4af37] px-8 py-2 mt-8 text-[10px] font-black tracking-[0.5em] uppercase rounded-full">❧ ETAB 2026 ❧</div>
     </div>
 
     <main id="main-view" class="max-w-7xl mx-auto px-4 pb-20">
@@ -61,6 +76,7 @@
         <div class="max-w-3xl mx-auto px-4 pt-20">
             <button onclick="closeArticle()" class="mb-12 font-black text-xs uppercase opacity-40 hover:opacity-100">← Tilbake til forsiden</button>
             
+            <div id="view-badge-container"></div>
             <h1 id="view-title" class="serif text-5xl md:text-7xl font-bold mb-8 leading-tight"></h1>
             <p id="view-lead" class="text-2xl mb-8 italic border-l-4 border-current pl-8 opacity-80"></p>
 
@@ -122,7 +138,7 @@
                         <select id="author-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none"></select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold uppercase">Stil</label>
+                        <label class="text-[10px] font-bold uppercase">Stil (Blå aktiverer NÅ-boks)</label>
                         <select id="bg-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
                             <option value="white">Hvit (Standard)</option>
                             <option value="blue">Mørkeblå (Viktig)</option>
@@ -154,7 +170,7 @@
             <div class="space-y-4">
                 <input type="text" id="tips-contact" placeholder="Navn/Kontakt (valgfritt)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
                 <textarea id="tips-body" placeholder="Hva skjer?" class="w-full bg-gray-50 p-4 rounded-xl h-32 outline-none"></textarea>
-                <button onclick="submitTips()" class="w-full bg-black text-white font-black py-5 rounded-2xl uppercase">Send tips</button>
+                <button id="tips-submit-btn" onclick="submitTips()" class="w-full bg-black text-white font-black py-5 rounded-2xl uppercase">Send tips</button>
                 <button onclick="closeTips()" class="w-full text-xs font-bold opacity-30 mt-4">Avbryt</button>
             </div>
         </div>
@@ -164,6 +180,9 @@
         const SUPABASE_URL = 'https://joyxkghutpwxrleafaxv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ERSTATT DENNE MED DIN DISCORD WEBHOOK URL
+        const DISCORD_WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_HER';
 
         const JOURNALISTS = [
             { name: "Jøran Hellestø", img: "https://i.ibb.co/JF5fHjQd/Skjermbilde-2026-01-15-172003.png" },
@@ -211,6 +230,7 @@
                     <div onclick="openArticle(${art.id})" class="cursor-pointer flex-grow">
                         <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
                         <div class="p-10">
+                            ${art.bg_color === 'blue' ? '<div class="now-badge">NÅ</div>' : ''}
                             <h2 class="serif ${i === 0 ? 'text-4xl md:text-6xl' : 'text-2xl md:text-3xl'} font-bold mb-6">${art.title}</h2>
                             <p class="opacity-70 line-clamp-3 text-lg">${art.lead || ''}</p>
                         </div>
@@ -233,16 +253,17 @@
             document.getElementById('header-visuals').classList.add('hidden');
             view.classList.remove('hidden');
 
+            // Vis NÅ-badge inne i artikkelen også om stilen er blå
+            document.getElementById('view-badge-container').innerHTML = art.bg_color === 'blue' ? '<div class="now-badge">NÅ</div>' : '';
+            
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
             
-            // Dato-format: 15. januar 2026 kl. 14:30
             const d = new Date(art.created_at);
             const dateStr = d.toLocaleDateString('no-NO', { day: 'numeric', month: 'long', year: 'numeric' });
             const timeStr = d.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('pub-date-bottom').innerText = `Publisert: ${dateStr} kl. ${timeStr}`;
 
-            // Journalist-system (Plassering under første bilde)
             const author = art.author_data || JOURNALISTS[0];
             const authorHtml = `
                 <div class="flex items-center gap-4 my-10 border-t border-b py-6">
@@ -261,14 +282,13 @@
                 } else {
                     contentHtml += `<img src="${b.value}" class="w-full rounded-2xl border-2 border-black mb-2 shadow-sm">`;
                     imgCount++;
-                    if(imgCount === 1) contentHtml += authorHtml; // Setter profil under bilde 1
+                    if(imgCount === 1) contentHtml += authorHtml;
                 }
             });
-            if(imgCount === 0) contentHtml = authorHtml + contentHtml; // Hvis null bilder, sett profil øverst
+            if(imgCount === 0) contentHtml = authorHtml + contentHtml;
 
             document.getElementById('article-content-area').innerHTML = contentHtml;
 
-            // Tags
             const tagsArea = document.getElementById('view-tags');
             tagsArea.innerHTML = '';
             (art.tags || "Fjellstad").split(',').forEach(t => {
@@ -325,7 +345,54 @@
         function closeArticle() { location.reload(); }
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord' }); }
         async function logout() { await _supabase.auth.signOut(); location.reload(); }
-        async function submitTips() { alert("Takk!"); closeTips(); }
+
+        // --- WEBHOOK FUNKSJON FOR TIPS ---
+        async function submitTips() {
+            const contact = document.getElementById('tips-contact').value;
+            const message = document.getElementById('tips-body').value;
+            const btn = document.getElementById('tips-submit-btn');
+
+            if (!message) return alert("Vennligst skriv inn et tips.");
+
+            btn.innerText = "Sender...";
+            btn.disabled = true;
+
+            const discordPayload = {
+                content: "🚨 **NYTT TIPS MOTTATT!**",
+                embeds: [{
+                    title: "Tips fra Fjellstadbladet",
+                    color: 15548997, // Rød farge
+                    fields: [
+                        { name: "Fra/Kontakt", value: contact || "Anonym" },
+                        { name: "Melding", value: message }
+                    ],
+                    footer: { text: "Sendt fra nettsiden" },
+                    timestamp: new Date()
+                }]
+            };
+
+            try {
+                const response = await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discordPayload)
+                });
+
+                if (response.ok) {
+                    alert("Takk for tipset! Redaksjonen er varslet.");
+                    closeTips();
+                    document.getElementById('tips-contact').value = "";
+                    document.getElementById('tips-body').value = "";
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                alert("Kunne ikke sende tips akkurat nå. Prøv igjen senere.");
+            } finally {
+                btn.innerText = "Send tips";
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
