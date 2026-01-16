@@ -19,12 +19,11 @@
         .bg-fjellstad-blue { background-color: #001f3f !important; color: white !important; }
         .bg-fjellstad-blue p, .bg-fjellstad-blue h2, .bg-fjellstad-blue h1 { color: white !important; }
 
-        /* NÅ-merke i rød boks med smooth corners */
         .now-badge {
             background-color: #ff0000;
             color: white;
             padding: 4px 12px;
-            border-radius: 8px; /* Smooth corners */
+            border-radius: 8px;
             font-weight: 900;
             font-size: 14px;
             display: inline-block;
@@ -132,17 +131,21 @@
         <div class="bg-white border-2 border-black rounded-[40px] p-8 max-w-2xl w-full my-10 relative">
             <h2 id="modal-title" class="serif text-3xl font-bold mb-6">Opprett sak</h2>
             <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="text-[10px] font-bold uppercase">Journalist</label>
                         <select id="author-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none"></select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold uppercase">Stil (Blå aktiverer NÅ-boks)</label>
+                        <label class="text-[10px] font-bold uppercase">Stil</label>
                         <select id="bg-select" class="w-full border p-3 rounded-xl bg-gray-50 outline-none">
                             <option value="white">Hvit (Standard)</option>
-                            <option value="blue">Mørkeblå (Viktig)</option>
+                            <option value="blue">Mørkeblå</option>
                         </select>
+                    </div>
+                    <div class="flex flex-col justify-center items-center bg-gray-50 rounded-xl border">
+                        <label class="text-[10px] font-bold uppercase mb-1">Vis NÅ-merke</label>
+                        <input type="checkbox" id="now-toggle" class="w-6 h-6 accent-red-600">
                     </div>
                 </div>
                 <div>
@@ -181,7 +184,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpveXhrZ2h1dHB3eHJsZWFmYXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODE4ODIsImV4cCI6MjA4NDA1Nzg4Mn0.Y25J6145yZmDzzwly-o2BXqmojL1nkFv5GieA6oGZik';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // ERSTATT DENNE MED DIN DISCORD WEBHOOK URL
         const DISCORD_WEBHOOK_URL = 'DIN_DISCORD_WEBHOOK_HER';
 
         const JOURNALISTS = [
@@ -230,7 +232,7 @@
                     <div onclick="openArticle(${art.id})" class="cursor-pointer flex-grow">
                         <img src="${art.mainImg}" class="${i === 0 ? 'h-[500px]' : 'h-64'} w-full object-cover">
                         <div class="p-10">
-                            ${art.bg_color === 'blue' ? '<div class="now-badge">NÅ</div>' : ''}
+                            ${art.show_now ? '<div class="now-badge">NÅ</div>' : ''}
                             <h2 class="serif ${i === 0 ? 'text-4xl md:text-6xl' : 'text-2xl md:text-3xl'} font-bold mb-6">${art.title}</h2>
                             <p class="opacity-70 line-clamp-3 text-lg">${art.lead || ''}</p>
                         </div>
@@ -253,8 +255,7 @@
             document.getElementById('header-visuals').classList.add('hidden');
             view.classList.remove('hidden');
 
-            // Vis NÅ-badge inne i artikkelen også om stilen er blå
-            document.getElementById('view-badge-container').innerHTML = art.bg_color === 'blue' ? '<div class="now-badge">NÅ</div>' : '';
+            document.getElementById('view-badge-container').innerHTML = art.show_now ? '<div class="now-badge">NÅ</div>' : '';
             
             document.getElementById('view-title').innerText = art.title;
             document.getElementById('view-lead').innerText = art.lead || '';
@@ -318,7 +319,8 @@
                 mainImg: contentBlocks.find(b => b.type === 'image')?.value || 'https://via.placeholder.com/1200x800',
                 author_data: JOURNALISTS[document.getElementById('author-select').value],
                 tags: document.getElementById('tags-in').value,
-                bg_color: document.getElementById('bg-select').value
+                bg_color: document.getElementById('bg-select').value,
+                show_now: document.getElementById('now-toggle').checked
             };
             if (editingId) await _supabase.from('articles').update(payload).eq('id', editingId);
             else await _supabase.from('articles').insert([payload]);
@@ -332,6 +334,7 @@
             document.getElementById('l-in').value = art.lead;
             document.getElementById('tags-in').value = art.tags || "";
             document.getElementById('bg-select').value = art.bg_color || "white";
+            document.getElementById('now-toggle').checked = art.show_now || false;
             contentBlocks = JSON.parse(JSON.stringify(art.blocks));
             renderBuilder();
             openModal();
@@ -346,7 +349,6 @@
         async function loginWithDiscord() { await _supabase.auth.signInWithOAuth({ provider: 'discord' }); }
         async function logout() { await _supabase.auth.signOut(); location.reload(); }
 
-        // --- WEBHOOK FUNKSJON FOR TIPS ---
         async function submitTips() {
             const contact = document.getElementById('tips-contact').value;
             const message = document.getElementById('tips-body').value;
@@ -361,7 +363,7 @@
                 content: "🚨 **NYTT TIPS MOTTATT!**",
                 embeds: [{
                     title: "Tips fra Fjellstadbladet",
-                    color: 15548997, // Rød farge
+                    color: 15548997,
                     fields: [
                         { name: "Fra/Kontakt", value: contact || "Anonym" },
                         { name: "Melding", value: message }
@@ -379,15 +381,13 @@
                 });
 
                 if (response.ok) {
-                    alert("Takk for tipset! Redaksjonen er varslet.");
+                    alert("Takk for tipset!");
                     closeTips();
                     document.getElementById('tips-contact').value = "";
                     document.getElementById('tips-body').value = "";
-                } else {
-                    throw new Error();
                 }
             } catch (err) {
-                alert("Kunne ikke sende tips akkurat nå. Prøv igjen senere.");
+                alert("Kunne ikke sende tips.");
             } finally {
                 btn.innerText = "Send tips";
                 btn.disabled = false;
